@@ -35,7 +35,7 @@
     patente:"",
     estado:null,
     logAmbulancias:[],
-    tipo:"",
+    tipo:1,
     motivo:"",
   });
 
@@ -107,6 +107,7 @@
     ambulancia_editar.value.patente = "";
     ambulancia_editar.value.estado = null;
     ambulancia_editar.value.logAmbulancias = [];
+    ambulancia_editar.value.tipo = 1;
     ambulancia_editar.value.motivo = "";
   }
 
@@ -175,7 +176,7 @@
   }
 
   const Actualizar = () => {
-    if (ambulancia_editar.value.movil.length > 1 && ambulancia_editar.value.patente.length > 1) {
+    if (ambulancia_editar.value.movil != "" && ambulancia_editar.value.patente.length > 1) {
       const existe_movil = ambulancias_disponibles.value.find( AD => AD.movil == ambulancia_editar.value.movil);
       const existe_patente = ambulancias_disponibles.value.find( AD => AD.patente == ambulancia_editar.value.patente);
 
@@ -198,8 +199,10 @@
           tipo:ambulancia_editar.value.tipo
         };
         axios.put('https://'+url+'/api/ambulancia/'+ambulancia_editar.value.id,params,config).then((response) => {
-          ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].patente = ambulancia_editar.value.patente;
-          ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].movil = ambulancia_editar.value.movil;
+          const indice = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id));
+          ambulancias_disponibles.value[indice].patente = ambulancia_editar.value.patente;
+          ambulancias_disponibles.value[indice].movil = ambulancia_editar.value.movil;
+          ambulancias_disponibles.value[indice].tipo = ambulancia_editar.value.tipo;
           toast.fire(
             "Excelente!",
             "la ambulancia se actualizó correctamente.",

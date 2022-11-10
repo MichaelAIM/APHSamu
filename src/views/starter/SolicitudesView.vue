@@ -22,7 +22,7 @@
       {
         label: "Nº",
         field: "numero",
-        width: "3%",
+        width: "10%",
         sortable: true,
       },
       {
@@ -33,6 +33,12 @@
         isKey: true,
       },
       {
+        label: "Estado",
+        field: "estado",
+        width: "15%",
+        sortable: true,
+      },
+      {
         label: "Contacto",
         field: "contacto",
         width: "15%",
@@ -41,7 +47,7 @@
       {
         label: "Teléfono",
         field: "telefono",
-        width: "15%",
+        width: "10%",
         sortable: true,
       },
       {
@@ -61,10 +67,13 @@
         field: "quick",
         width: "10%",
         display: function (row) {
-          return (
-            '<a href="'+boucher+'/#/boucher/' +
-            row.id +'" target="_blank" class="btn btn-primary" >Imprimir</a>'
-          );
+          console.log(row);
+          if(row.idEstado == 1){
+            return (
+              '<a href="'+boucher+'/#/boucher/' +
+              row.id +'" target="_blank" class="btn btn-primary" >Imprimir</a>'
+            );
+          }
         },
       },
     ],
@@ -91,10 +100,12 @@
           data.push({
             numero: i + 1,
             id: response.data['solicitudes'][i].id,
+            estado: response.data['solicitudes'][i].Estado.estado,
             contacto: response.data['solicitudes'][i].contacto,
             telefono: response.data['solicitudes'][i].telefono,
             lugar: response.data['solicitudes'][i].lugar,
-            fecha: response.data['solicitudes'][i].createdAt,
+            fecha: moment(response.data['solicitudes'][i].createdAt).format('DD/MM/YYYY - HH:mm:ss'),
+            idEstado: response.data['solicitudes'][i].estadoId,
           });
         }
     });
@@ -103,10 +114,10 @@
 <template>
     <BasePageHeading title="Solicitudes" subtitle="Listado de solicitudes en curso">
         <template #extra>
-            <button type="button" class="btn btn-alt-primary" v-click-ripple>
+<!--             <button type="button" class="btn btn-alt-primary" v-click-ripple>
                 <i class="fa fa-plus opacity-50 me-1"></i>
                 Nueva Solicitud
-            </button>
+            </button> -->
         </template>
     </BasePageHeading>
     <div class="content">
