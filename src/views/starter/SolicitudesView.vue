@@ -6,9 +6,14 @@
   import axios from 'axios';
   let url = '';
   let boucher = '';
-  if (window.document.location.host === "127.0.0.1:3000") {
+  if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+  if(window.document.location.host === "10.8.83.72:3000"){
+      url = '10.8.83.72:8000';
+      boucher = 'https://10.8.83.72:3000';
+    }else{
       url = 'localhost:8000';
       boucher = 'http://127.0.0.1:3000';
+    }
   }else{
       url = 'www.ssarica.cl';
       boucher = 'https://www.ssarica.cl/AP_SAMU';
