@@ -29,7 +29,7 @@ if (window.document.location.host === "127.0.0.1:3000" || window.document.locati
       boucher = 'https://10.8.83.72:3000';
     }else{
       url = 'localhost:8000';
-      boucher = 'http://127.0.0.1:3000';
+      boucher = 'https://127.0.0.1:3000';
     }
 }else{
     boucher = 'https://www.ssarica.cl/AP_SAMU';

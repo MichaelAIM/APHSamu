@@ -2,112 +2,134 @@
 import draggable from "vuedraggable";
 import TableLite from "vue3-table-lite";
 import moment from 'moment';
+import Swal from "sweetalert2";
+import axios from 'axios';
+import { ref, reactive, computed, onMounted } from 'vue'
 
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+//Config
+let url = '';
+let boucher = '';
+if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+    if(window.document.location.host === "10.8.83.72:3000"){
+        url = '10.8.83.72:8000';
+        boucher = 'https://10.8.83.72:3000';
+    }else{
+        url = 'localhost:8000';
+        boucher = 'https://127.0.0.1:3000';
+    }
+}else{
+    boucher = 'https://www.ssarica.cl/AP_SAMU';
+    url = 'www.ssarica.cl';
+}
+const config = {
+    headers:{
+        'x-token': localStorage.getItem('uid')
+    }
+};
 
-const ambulancias_disponibles = ref([
-    {
-        id: 1,
-        name: 'Movil 1',
-        numero:1,
-        solicitud: 4,
-        tipo:2,
-        dap: 13,
-        estado: 1,
-        despacho: true,
-        tripulacion: [
-            { name: "Juan Carlos Ramirez", id: 1, tipo:1, estado:1, movil:1},
-            { name: "Edgard doe", id: 4, tipo:2, estado:1, movil:1},
-            { name: "Dwayne Johnson", id: 11, tipo:3 , estado:1, movil:1},
-        ],
-        motivo:"",
-        f_salida:"2022-05-14 12:54:08",
-        qtrs:[
-          { id:1, numero:1, created_at: "2022-04-21 11:32:55" },
-          { id:2, numero:2, created_at: "2022-04-21 11:35:15" },
-          { id:3, numero:3, created_at: "2022-04-21 12:02:12" },
-        ],
-    },
-    {
-        id: 2,
-        name: 'Movil 2',
-        numero:2,
-        solicitud: 2,
-        tipo:1,
-        dap: null,
-        estado: 1,
-        despacho: false,
-        tripulacion: [],
-        motivo:"",
-        f_salida:"",
-        qtrs:[],
-    },
-    {
-        id: 4,
-        name: 'Movil 4',
-        numero:4,
-        solicitud: null,
-        tipo:1,
-        dap: null,
-        estado: 1,
-        despacho: false,
-        tripulacion: [],
-        motivo:"",
-        f_salida:"",
-        qtrs:[],
-    },
-    {
-        id: 6,
-        name: 'Movil 15',
-        numero:15,
-        solicitud: null,
-        tipo:1,
-        dap: null,
-        estado: 1,
-        despacho: false,
-        tripulacion: [],
-        motivo:"",
-        f_salida:"",
-        qtrs:[],
-    },
-    {
-        id: 5,
-        name: 'Movil 14',
-        solicitud: null,
-        numero:14,
-        tipo:1,
-        dap: null,
-        estado: 2,
-        despacho: false,
-        tripulacion: [],
-        motivo:"La ambulancia no esta disponible por falla de motor.",
-        f_salida:"",
-        qtrs:[],
-    },
-    {
-        id: 3,
-        name: 'Movil 3',
-        numero:3,
-        solicitud: null,
-        tipo:1,
-        dap: null,
-        estado: 2,
-        despacho: false,
-        tripulacion: [],
-        motivo:" La ambulancia se encuentra en el taller por cambio de pastillas de freno",
-        f_salida:"",
-        qtrs:[],
-    },
-]);
-
+// const ambulancias_disponibles = ref([
+//     {
+//         id: 1,
+//         name: 'Movil 1',
+//         numero:1,
+//         solicitud: 4,
+//         tipo:2,
+//         dap: 13,
+//         estado: 1,
+//         despacho: true,
+//         tripulacion: [
+//             { name: "Juan Carlos Ramirez", id: 1, tipo:1, estado:1, movil:1},
+//             { name: "Edgard doe", id: 4, tipo:2, estado:1, movil:1},
+//             { name: "Dwayne Johnson", id: 11, tipo:3 , estado:1, movil:1},
+//         ],
+//         motivo:"",
+//         f_salida:"2022-05-14 12:54:08",
+//         qtrs:[
+//           { id:1, numero:1, created_at: "2022-04-21 11:32:55" },
+//           { id:2, numero:2, created_at: "2022-04-21 11:35:15" },
+//           { id:3, numero:3, created_at: "2022-04-21 12:02:12" },
+//         ],
+//     },
+//     {
+//         id: 2,
+//         name: 'Movil 2',
+//         numero:2,
+//         solicitud: 2,
+//         tipo:1,
+//         dap: null,
+//         estado: 1,
+//         despacho: false,
+//         tripulacion: [],
+//         motivo:"",
+//         f_salida:"",
+//         qtrs:[],
+//     },
+//     {
+//         id: 4,
+//         name: 'Movil 4',
+//         numero:4,
+//         solicitud: null,
+//         tipo:1,
+//         dap: null,
+//         estado: 1,
+//         despacho: false,
+//         tripulacion: [],
+//         motivo:"",
+//         f_salida:"",
+//         qtrs:[],
+//     },
+//     {
+//         id: 6,
+//         name: 'Movil 15',
+//         numero:15,
+//         solicitud: null,
+//         tipo:1,
+//         dap: null,
+//         estado: 1,
+//         despacho: false,
+//         tripulacion: [],
+//         motivo:"",
+//         f_salida:"",
+//         qtrs:[],
+//     },
+//     {
+//         id: 5,
+//         name: 'Movil 14',
+//         solicitud: null,
+//         numero:14,
+//         tipo:1,
+//         dap: null,
+//         estado: 2,
+//         despacho: false,
+//         tripulacion: [],
+//         motivo:"La ambulancia no esta disponible por falla de motor.",
+//         f_salida:"",
+//         qtrs:[],
+//     },
+//     {
+//         id: 3,
+//         name: 'Movil 3',
+//         numero:3,
+//         solicitud: null,
+//         tipo:1,
+//         dap: null,
+//         estado: 2,
+//         despacho: false,
+//         tripulacion: [],
+//         motivo:" La ambulancia se encuentra en el taller por cambio de pastillas de freno",
+//         f_salida:"",
+//         qtrs:[],
+//     },
+// ]);
+const ambulancias_disponibles = ref();
 const kpis = ref({
-  activos:[],
-  inactivos:[],
+    activos:[],
+    inactivos:[],
 });
 
 const set_kpis = () => {
-  kpis.value.activos = ambulancias_disponibles.value.filter( AD => AD.estado == 1);
-  kpis.value.inactivos = ambulancias_disponibles.value.filter( AD => AD.estado != 1);
+    kpis.value.activos = ambulancias_disponibles.value.filter( AD => AD.estado == 1);
+    kpis.value.inactivos = ambulancias_disponibles.value.filter( AD => AD.estado != 1);
 }
 
 // Table config
@@ -171,10 +193,31 @@ const table = reactive({
 });
 
 onMounted(() => {
-  set_kpis();
+    axios.get('https://'+url+'/api/Ambulancia/all_disponibles',config).then((response) => {
+        ambulancias_disponibles.value = response.data['ambulancias'];
+    }).then((response) => {
+        let arr = ambulancias_disponibles.value.map( (e) => {
+            if (e.Cometidos[0].id) {
+                axios.get('https://'+url+'/api/Qtr/comQtr/'+e.Cometidos[0].idSolicitud,{"idCometido":e.Cometidos[0].id},config).then((resp) => {
+                    console.log(resp);
+                });
+            }
+            return e;            
+        });
+        console.log(arr);
+
+    }).catch(function (error) {
+        console.log(error.response.data.msg);
+        window.location.assign('https://www.ssarica.cl');
+    });
+    // set_kpis();
 });
 
 </script>
+<style lang="scss">
+// SweetAlert2
+@import "sweetalert2/dist/sweetalert2.min.css";
+</style>
 <template>
     <BasePageHeading title="Despacho de Móviles" subtitle="Gestión de Despachos">
         <template #extra>
@@ -230,10 +273,10 @@ onMounted(() => {
                                         <span class="badge bg-city align-middle ms-2 px-3"  v-show="amb.estado == 2">En Mantención</span>                                        
                                     </h4>
                                 </div>
-                                <ul class='time-horizontal my-5' v-show="amb.qtrs[0]">
+                                <!-- <ul class='time-horizontal my-5' v-show="amb.qtrs[0]">
                                     <li v-for="(qtr, i) in amb.qtrs"><span>QTR {{qtr.numero}}</span><b :class="[amb.qtrs.length-1 == i ? 'active' : 'passivo']"> </b><br> {{moment(qtr.created_at).format("DD/MM/YYYY")}}  <br> {{moment(qtr.created_at).format("HH:mm:ss")}} </li>
                                     <li v-for="i in (11-amb.qtrs.length)"><b></b></li>
-                                </ul>
+                                </ul> -->
                             </div>
                             <div class="col-md-7 my-4" v-show="amb.estado == 1 && amb.despacho">
                                 <div class="row">
