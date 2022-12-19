@@ -6,13 +6,13 @@ import Swal from "sweetalert2";
 import axios from 'axios';
 // Configurations
 let toast = Swal.mixin({
-  buttonsStyling: false,
-  target: "#page-container",
-  customClass: {
-    confirmButton: "btn btn-success m-1",
-    cancelButton: "btn btn-danger m-1",
-    input: "form-control",
-  },
+    buttonsStyling: false,
+    target: "#page-container",
+    customClass: {
+        confirmButton: "btn btn-success m-1",
+        cancelButton: "btn btn-danger m-1",
+        input: "form-control",
+    },
 });
 const alertSuccess = () =>{
     toast.fire(
@@ -24,12 +24,12 @@ const alertSuccess = () =>{
 let url = '';
 let boucher = '';
 if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
-  if(window.document.location.host === "10.8.83.72:3000"){
-      url = '10.8.83.72:8000';
-      boucher = 'https://10.8.83.72:3000';
+    if(window.document.location.host === "10.8.83.72:3000"){
+        url = '10.8.83.72:8000';
+        boucher = 'https://10.8.83.72:3000';
     }else{
-      url = 'localhost:8000';
-      boucher = 'https://127.0.0.1:3000';
+        url = 'localhost:8000';
+        boucher = 'https://127.0.0.1:3000';
     }
 }else{
     boucher = 'https://www.ssarica.cl/AP_SAMU';

@@ -66,8 +66,8 @@ onMounted(()=>{
 
 <template>
   <!-- Hero -->
-  <div class=" bg-body-extra-light">
-    <div class="content content-full">
+  <div class=" bg-body-extra-light" style="max-width:260px;">
+    <div class="content content-full px-1">
       <div class="row">
         <div class="col-12">
             <h2 class="my-0">SAMU Arica</h2>
@@ -100,10 +100,10 @@ onMounted(()=>{
               <strong v-show="solicitud.referencia">{{ solicitud.referencia }}</strong>
               <strong v-show="!solicitud.referencia">NO DATA</strong>
             </p>
-            <p>Descripción: <strong>{{ solicitud.motivo }}</strong></p>
-            <strong>Qtr´s:</strong>
+            <p>Motivo de Consulta: <strong>{{ solicitud.motivo }}</strong></p>
+            <h3 class="mb-1">Qtr´s:</h3>
             <p v-for="qtr in solicitud.qtrs" :key="qtr.id">{{qtr.numero}}: <strong>{{moment(qtr.createdAt).format('DD/MM/YYYY HH:mm:ss')}}</strong></p>
-            <strong>Cometidos:</strong>
+            <h3 class="mb-1">Cometidos:</h3>
             <ul>
               <li v-for="cometido in solicitud.Cometidos" :key="cometido.id">
                 <p> Movil Nº <strong>{{cometido.idAmbulancia}}</strong>: </p>
@@ -122,6 +122,14 @@ onMounted(()=>{
 </template>
 <style scoped>
 p{
-  margin-bottom: 5px;;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+h2, h3, span{
+  color: #000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 }
 </style>

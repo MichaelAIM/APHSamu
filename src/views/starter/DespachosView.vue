@@ -144,7 +144,8 @@ for (let i = 0; i < 16; i++) {
     });
 }
 const table = reactive({
-    columns: [{
+    columns: [
+        {
             label: "MOVIL",
             field: "id",
             width: "3%",
@@ -196,21 +197,27 @@ onMounted(() => {
     axios.get('https://'+url+'/api/Ambulancia/all_disponibles',config).then((response) => {
         ambulancias_disponibles.value = response.data['ambulancias'];
     }).then((response) => {
-        let arr = ambulancias_disponibles.value.map( (e) => {
-            if (e.Cometidos[0].id) {
-                axios.get('https://'+url+'/api/Qtr/comQtr/'+e.Cometidos[0].idSolicitud,{"idCometido":e.Cometidos[0].id},config).then((resp) => {
-                    console.log(resp);
+        ambulancias_disponibles.value = ambulancias_disponibles.value.map( (e) => {
+            if (e.Cometidos.length > 0) {
+                e["qtrs"] = [];
+                axios.put('https://'+url+'/api/Qtr/comQtr/'+e.Cometidos[0].idSolicitud,{"idCometido":e.Cometidos[0].id},config).then((resp) => {
+                    e["qtrs"] = resp.data["Qtrs"];
                 });
             }
             return e;            
         });
-        console.log(arr);
-
+        set_kpis();
     }).catch(function (error) {
-        console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
+        console.log(error);
+        // window.location.assign('https://www.ssarica.cl');
     });
-    // set_kpis();
+
+    axios.get('https://'+url+'/api/cometidos//Turno/dia',config).then((response) => {
+        console.log(response.data['cometidos']);
+    }).catch(function (error) {
+        console.log(error);
+        // window.location.assign('https://www.ssarica.cl');
+    });
 });
 
 </script>
@@ -232,7 +239,7 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="bg-body-light rounded-bottom p-2" style="min-height: 50px;">
-                    <span class="fs-xs fw-semibold d-inline-block w-auto py-2 px-3 mx-1 rounded-pill bg-success-light text-success" :key="ac" v-for=" ac in kpis.activos">{{ac.numero}}</span>
+                    <span class="fs-xs fw-semibold d-inline-block w-auto py-2 px-3 mx-1 rounded-pill bg-success-light text-success" :key="ac" v-for=" ac in kpis.activos">{{ac.movil}}</span>
                 </div>
             </div>
         </template>
@@ -241,14 +248,14 @@ onMounted(() => {
                 <div class="block-content block-content-full flex-grow-1 d-flex justify-content-between align-items-center">
                     <dl class="mb-0">
                         <i class="fa fa-truck-medical fs-3 text-danger"></i>
-                        <dd class="fs-sm fw-medium fs-sm fw-medium text-muted mb-0 me-3"> En Mantención </dd>
+                        <dd class="fs-sm fw-medium fs-sm fw-medium text-muted mb-0 me-3"> No Disponibles </dd>
                     </dl>
                     <div class="item item-rounded-lg bg-body-light">
                         <dt class="fs-3 fw-bold">{{ kpis.inactivos.length }}</dt>
                     </div>
                 </div>
                 <div class="bg-body-light rounded-bottom  p-2" style="min-height: 50px;">
-                    <span class="fs-xs fw-semibold d-inline-block w-auto py-2 px-3 mx-1 rounded-pill bg-warning-light text-warning" v-for=" pk in kpis.inactivos">{{pk.numero}}</span>
+                    <span class="fs-xs fw-semibold d-inline-block w-auto py-2 px-3 mx-1 rounded-pill bg-warning-light text-warning" v-for=" pk in kpis.inactivos">{{pk.movil}}</span>
                 </div>
             </div>
         </template>
@@ -267,136 +274,84 @@ onMounted(() => {
                                 <div class="d-flex align-items-center">
                                     <h4 class="flex-grow-1 my-auto">
                                         <i class="far fa-circle-dot me-2" :class="[amb.estado == 1 ? 'text-success' : ' text-warning']"></i>
-                                        Movíl N° {{amb.numero}}
+                                        Movíl N° {{amb.movil}}
+                                        <span v-show="amb.tipo == 1" class="badge bg-info align-middle badgeTipo">Básica</span>
+                                        <span v-show="amb.tipo == 2" class="badge bg-flat-op align-middle badgeTipo">Avanzada</span>
                                         <span class="badge bg-warning-M align-middle ms-2 px-3" v-show="amb.estado == 1 && amb.despacho">En Cometido</span>
                                         <span class="badge bg-success align-middle ms-2 px-3"  v-show="amb.estado == 1 && !amb.despacho">Disponible</span>
-                                        <span class="badge bg-city align-middle ms-2 px-3"  v-show="amb.estado == 2">En Mantención</span>                                        
+                                        <span class="badge bg-city align-middle ms-2 px-3"  v-show="amb.estado == 2">No Disponible</span>                                        
                                     </h4>
                                 </div>
-                                <!-- <ul class='time-horizontal my-5' v-show="amb.qtrs[0]">
-                                    <li v-for="(qtr, i) in amb.qtrs"><span>QTR {{qtr.numero}}</span><b :class="[amb.qtrs.length-1 == i ? 'active' : 'passivo']"> </b><br> {{moment(qtr.created_at).format("DD/MM/YYYY")}}  <br> {{moment(qtr.created_at).format("HH:mm:ss")}} </li>
-                                    <li v-for="i in (11-amb.qtrs.length)"><b></b></li>
-                                </ul> -->
+                                <ul class='time-horizontal my-5' v-show="amb.qtrs">
+                                    <li v-for="(qtr, i) in amb.qtrs">
+                                        <span>QTR {{qtr.numero}}</span>
+                                        <b :class="[amb.qtrs.length-1 == i ? 'active' : 'passivo']"> </b>
+                                        <br> 
+                                        {{moment(qtr.createdAt).format("DD/MM/YYYY")}}  
+                                        <br> 
+                                        {{moment(qtr.createdAt).format("HH:mm:ss")}} 
+                                    </li>
+                                    <!-- <li v-for="i in (11-amb.qtrs.length)"><b></b></li> -->
+                                </ul>
                             </div>
-                            <div class="col-md-7 my-4" v-show="amb.estado == 1 && amb.despacho">
+                            <div class="col-md-6 my-4" v-show="amb.estado == 1 && amb.despacho">
                                 <div class="row">
                                     <div class="col-3">
                                         <h4 class="mb-2">Solicitud:</h4>
                                     </div>
                                     <div class="col-3">
-                                       <p>{{amb.solicitud}}</p>
-                                    </div>
+                                        <p v-if="amb.Cometidos.length > 0">{{amb.Cometidos[0].idSolicitud}}</p>
+                                    </div>    
                                     <div class="col-3">
                                         <h4 class="mb-2">Dap:</h4>
                                     </div>
                                     <div class="col-3">
-                                        <p>{{amb.dap}}</p>
+                                        <p v-if="amb.Cometidos.length > 0">{{amb.Cometidos[0].idDap}}</p>
                                     </div>
-                                    <div class="col-3 mt-md-3">
+                                    <div class="col-5  mt-md-3">
                                         <h4 class="mb-2">Fecha salida:</h4>
                                     </div>
-                                    <div class="col-4 mt-md-3">
+                                    <div class="col-7  mt-md-3">
                                         <p class="mb-2">{{moment(amb.f_salida).format("DD/MM/YYYY HH:mm:ss")}}</p>
-                                    </div>
-                                    <div class="col-2 mt-md-3">
-                                      <h4 class="mb-2">Tipo</h4>
-                                    </div>
-                                    <div class="col-3 mt-md-3">
-                                      <span v-show="amb.tipo == 1" class="badge bg-info align-middle badgeTipo">Básica</span>
-                                      <span v-show="amb.tipo == 2" class="badge bg-flat-op align-middle badgeTipo">Avanzada</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-5 my-4" v-show="amb.estado == 1 && amb.despacho">
+                            <div class="col-md-6 my-4" v-show="amb.estado == 1 && amb.despacho">
                                 <div class="row">
                                     <div class="col-5">
                                         <h4 class="mb-2">Tripulación:</h4>
                                     </div>
                                     <div class="col-7">
-                                        <div class="row">
-                                            <p class="mb-2" v-for="trip in amb.tripulacion">
-                                                <i v-show="trip.tipo == 1" class="nav-main-link-icon fa-2xl fa fa-user-doctor me-2"></i>
-                                                <i v-show="trip.tipo == 2" class="nav-main-link-icon fa-2xl fa fa-user-nurse me-2"></i>
-                                                <i v-show="trip.tipo == 3" class="nav-main-link-icon fa-xl fa fa-truck-front me-2"></i>
-                                                {{trip.name}}
+                                        <div class="row" v-if="amb.Cometidos.length > 0">
+                                            <p class="mb-2" v-for="trip in amb.Cometidos[0].tripulacionCometidos">
+                                                <i v-show="trip.idTipoFuncionario == 1" class="nav-main-link-icon fa-2xl fa fa-user-doctor me-2"></i>
+                                                <i v-show="trip.idTipoFuncionario == 2" class="nav-main-link-icon fa-2xl fa fa-user-nurse me-2"></i>
+                                                <i v-show="trip.idTipoFuncionario == 3" class="nav-main-link-icon fa-xl fa fa-truck-front me-2"></i>
+                                                {{trip.Funcionario.nombre}}
                                             </p>
-<!--                                             <p class="mb-2">
-                                                Juán Peréz
-                                            </p>
-                                            <p class="mb-2">
-                                                Jorge Rios
-                                            </p> -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="block-content" v-show="!amb.despacho || amb.estado != 1">
-                              <div :class="[amb.estado == 1 && !amb.despacho ? 'alert-success' : 'alert-warning']" class="alert d-flex align-items-center justify-content-between" role="alert">
-                                <div class="flex-grow-1 me-3">
-                                  <p class="mb-0">
-                                    <template v-if="amb.estado != 1">
-                                      {{amb.motivo}}
-                                    </template>
-                                    <template v-else>
-                                      Ambulancia Activa - <a class="alert-link" href="#">Disponible</a>!
-                                    </template>
-                                  </p>
+                                <div :class="[amb.estado == 1 && !amb.despacho ? 'alert-success' : 'alert-warning']" class="alert d-flex align-items-center justify-content-between" role="alert">
+                                    <div class="flex-grow-1 me-3">
+                                        <p class="mb-0">
+                                            <template v-if="amb.estado != 1 && amb.logAmbulancias.length > 0">
+                                                {{amb.logAmbulancias[0].motivo}}
+                                            </template>
+                                            <template v-else>
+                                                Ambulancia Activa - <a class="alert-link" href="#">Disponible</a>!
+                                            </template>
+                                        </p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <i class="fa fa-fw fa-check-circle"></i>
+                                    </div>
                                 </div>
-                                <div class="flex-shrink-0">
-                                  <i class="fa fa-fw fa-check-circle"></i>
-                                </div>
-                              </div>
-                           </div>
+                            </div>
 <hr>
                         </div>
-<!--                         <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <h4 class="flex-grow-1 my-auto">
-                                        <i class="far fa-circle-dot text-success me-2"></i>
-                                        Movíl N° 1
-                                        <span class="badge bg-success align-middle ms-2 px-3">Disponible</span>
-                                    </h4>
-                                </div>
-                            </div>
-                            <div class="block-content">
-                              <div class="alert alert-success d-flex align-items-center justify-content-between" role="alert">
-                                <div class="flex-grow-1 me-3">
-                                  <p class="mb-0">
-                                    Ambulancia Activa - <a class="alert-link" href="#">Disponible</a>!
-                                  </p>
-                                </div>
-                                <div class="flex-shrink-0">
-                                  <i class="fa fa-fw fa-check-circle"></i>
-                                </div>
-                              </div>
-                           </div>
-                        </div>
-<hr>
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <h4 class="flex-grow-1 my-auto">
-                                        <i class="far fa-circle-dot text-danger me-2"></i>
-                                        Movíl N° 1
-                                        <span class="badge bg-city align-middle ms-2 px-3">En Mantención</span>
-                                    </h4>
-                                </div>
-                            </div>
-                            <div class="block-content">
-                              <div class="alert alert-warning d-flex align-items-center justify-content-between" role="alert">
-                                <div class="flex-grow-1 me-3">
-                                  <p class="mb-0">
-                                    La ambulancia se encuentra en el taller por realizar el cambio de aceite de motoor.
-                                  </p>
-                                </div>
-                                <div class="flex-shrink-0">
-                                  <i class="fa fa-triangle-exclamation text-warning"></i>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-<hr> -->
                     </div>
                 </div>
             </div>
@@ -409,15 +364,14 @@ onMounted(() => {
                     </h3>
                 </div>
                 <div class="block-content p-0">
-                    <div class="row mb-4">
-                        <div class="block-rounded block">
-                            <div class="block-content">
-                                <div style="text-align: left" class="mb-3">
-                                    <label class="me-2">Buscar por: </label><input v-model="searchTerm" />
-                                </div>
-                                <table-lite :is-static-mode="true" :columns="table.columns" :rows="table.rows" :total="table.totalRecordCount" :sortable="table.sortable">
-                                </table-lite>
+                    <div class="block-rounded block">
+                        <div class="block-content">
+                            <div style="text-align: left" class="mb-3">
+                                <label class="me-2">Buscar por: </label>
+                                <input v-model="searchTerm" />
                             </div>
+                            <table-lite :is-static-mode="true" :columns="table.columns" :rows="table.rows" :total="table.totalRecordCount" :sortable="table.sortable">
+                            </table-lite>
                         </div>
                     </div>
                 </div>
@@ -458,7 +412,6 @@ onMounted(() => {
     list-style-type: none;
     border-top: 1px solid #cdc8c8;
     max-width: 100%;
-    min-width: 900px;
     padding: 30px;
     padding-top: 3px;
     margin: 0px;

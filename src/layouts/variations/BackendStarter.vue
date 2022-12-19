@@ -21,16 +21,19 @@ store.setLayout({
 store.headerStyle({ mode: "dark" });
 store.mainContent({ mode: "narrow" });
 let encode = "";
-if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
-  if(window.document.location.host === "10.8.83.72:3000"){
-    url = '10.8.83.72:8000';
+if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.74:3000") {
+
+  if(window.document.location.host === "10.8.83.74:3000"){
+    url = '10.8.83.74:8000';
   }else{
     url = 'localhost:8000';
   }
+  
   const encrypt = btoa("16467901-2");
   const newExcrypt = "X"+encrypt;
   encode = btoa(newExcrypt);
   localStorage.setItem('key',encode);
+
 } else {
   url = 'www.ssarica.cl';
   encode = localStorage.getItem('key');
@@ -44,7 +47,6 @@ axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
   console.log(error.response.data.msg);
   window.location.assign('https://www.ssarica.cl');
 });
-
 </script>
 
 <template>
