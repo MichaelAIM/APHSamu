@@ -19,7 +19,7 @@ if (window.document.location.host === "127.0.0.1:3000" || window.document.locati
     }
 }else{
     boucher = 'https://www.ssarica.cl/AP_SAMU';
-    url = 'www.ssarica.cl';
+    url = 'www.ssarica.cl:8000';
 }
 const config = {
     headers:{

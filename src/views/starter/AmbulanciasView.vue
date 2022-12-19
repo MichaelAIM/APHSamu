@@ -29,7 +29,7 @@
       url = 'localhost:8000';
     }
   }else{
-      url = 'www.ssarica.cl';
+      url = 'www.ssarica.cl:8000';
   }
   const ambulancias_disponibles = ref();
 

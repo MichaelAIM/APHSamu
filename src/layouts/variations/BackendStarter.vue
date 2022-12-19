@@ -35,17 +35,17 @@ if (window.document.location.host === "127.0.0.1:3000" || window.document.locati
   localStorage.setItem('key',encode);
 
 } else {
-  url = 'www.ssarica.cl';
+  url = 'www.ssarica.cl:8000';
   encode = localStorage.getItem('key');
 }
-
+console.log('URL: '+ url);
 axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
   localStorage.setItem('session',response.data['funcionario'].nombre);
   localStorage.setItem('uid', response.data['token']);
   nombreSession.value = response.data['funcionario'].nombre;
 }).catch(function (error) {
   console.log(error.response.data.msg);
-  window.location.assign('https://www.ssarica.cl');
+  // window.location.assign('https://www.ssarica.cl');
 });
 </script>
 
