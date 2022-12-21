@@ -212,12 +212,12 @@ onMounted(() => {
         // window.location.assign('https://www.ssarica.cl');
     });
 
-    axios.get('https://'+url+'/api/cometidos//Turno/dia',config).then((response) => {
-        console.log(response.data['cometidos']);
-    }).catch(function (error) {
-        console.log(error);
+    // axios.get('https://'+url+'/api/cometidos/Turno/dia',config).then((response) => {
+        // console.log(response.data['cometidos']);
+    // }).catch(function (error) {
+        // console.log(error);
         // window.location.assign('https://www.ssarica.cl');
-    });
+    // });
 });
 
 </script>
@@ -356,7 +356,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="col-12">
+        <!-- <div class="col-12">
             <div class="block-rounded block">
                 <div class="block-header block-header-default bg-primary-dark text-white">
                     <h3 class="block-title">
@@ -376,7 +376,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 <style>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onBeforeMount } from 'vue'
+import { ref, reactive, computed, onBeforeMount, onMounted } from 'vue'
 import Swal from "sweetalert2";
 import axios from 'axios';
 
@@ -33,6 +33,7 @@ const allTurno = ref();
 const searchEnfermero = ref();
 const searchTecnico = ref();
 const searchConductor = ref();
+const responsable = ref();
 let btnLoading = ref(false);
 //Arrays de todos los funcionarios de samu
 const funcionarios = reactive({
@@ -97,6 +98,7 @@ function Limpiar(){
   }
 }
 function GuardarTurno(){
+    console.log(responsable.value);
     btnLoading.value = true;
     allTurno.value = [];
     for (let i = 0; i < seleccionados.enfermero.length; i++) {
@@ -110,24 +112,29 @@ function GuardarTurno(){
     }
     const params = {
         turnoAnterior : idTurnoAnterior.value,
-        funcTurno : allTurno.value
+        funcTurno : allTurno.value,
+        resp: responsable.value
     }
+
+    console.log(params);
+
     axios.post('https://'+url+'/api/Turno',params,config).then((response) => {
         console.log(response.data);
         btnLoading.value = false;
         toast.fire("Excelente!", "El turno fue creado con exito!", "success");
     }).catch(function (error) {
         console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
+        // window.location.assign('https://www.ssarica.cl');
     });
   // toast.fire("Oops...", "Ocurrio un error en el ingreso de los datos. Por favor intente nuevamente!", "error");  
 }
 
 onBeforeMount(() => {
     axios.get('https://'+url+'/api/Turno/disponibles',config).then((response) => {
-        if (response.data['TurnoDisponible'][0]) {  
+        if (response.data['TurnoDisponible'].length > 0) {  
             idTurnoAnterior.value = response.data['TurnoDisponible'][0].id;
-            if(idTurnoAnterior){
+            if(idTurnoAnterior != ""){
+                console.log(idTurnoAnterior);
                 const trip = response.data['TurnoDisponible'][0].tripulacionTurnos;
                 allTurno.value = trip;
                 for (let i = 0; i < trip.length; i++) {
@@ -141,6 +148,8 @@ onBeforeMount(() => {
                     }else{}
                 }
             }
+        }else{
+            toast.fire("Oops...", "no existe turno creado!", "warning");             
         }
     }).catch(function (error) {
         console.log(error.response.data.msg);
@@ -173,6 +182,16 @@ onBeforeMount(() => {
     }).catch(function (error) {
         console.log(error.response.data.msg);
         //window.location.assign('https://www.ssarica.cl');
+    });
+});
+
+onMounted(() => {
+    axios.post("https://"+url+"/api/auth/login",{key: localStorage.getItem('key')}).then((response) => {
+        responsable.value = response.data['funcionario'].id;
+        console.log(response.data['funcionario']);
+    }).catch(function (error) {
+        console.log(error.response.data.msg);
+        // window.location.assign('https://www.ssarica.cl');
     });
 });
 </script>

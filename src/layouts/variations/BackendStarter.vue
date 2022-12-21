@@ -39,6 +39,7 @@ if (window.document.location.host === "127.0.0.1:3000" || window.document.locati
   encode = localStorage.getItem('key');
 }
 console.log('URL: '+ url);
+console.log('KEY: '+ encode);
 axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
   localStorage.setItem('session',response.data['funcionario'].nombre);
   localStorage.setItem('uid', response.data['token']);
