@@ -358,8 +358,10 @@ onMounted(() => {
         window.location.assign('https://www.ssarica.cl');
     });
     axios.get('https://'+url+'/api/Turno/disponibles',config).then((response) => {
-        if(response.data['TurnoDisponible']){
+        if(response.data['TurnoDisponible'].length > 0){
             tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
+        }else{
+            toast.fire("Oops...", "no existe turno creado! Antes de ingresar una solicitud, debe crear un turno", "warning");             
         }
     }).catch(function (error) {
         console.log(error.response.data.msg);
@@ -477,8 +479,8 @@ onMounted(() => {
                                             </div>
                                             <div class="col-12 col-md-4 mb-4">
                                                 <div class="form-floating mt-4" v-show="solicitud_en_curso.tipo_llamada == 1">
-                                                    <input type="telephone" class="form-control" id="example-text-input-floating" v-model="solicitud_en_curso.telefono" name="example-text-input-floating" placeholder="Juan Perez">
-                                                    <label for="example-text-input-floating">Teléfono</label>
+                                                    <input type="number" class="form-control" id="example-text-input-floating" v-model="solicitud_en_curso.telefono" name="example-text-input-floating" placeholder="Juan Perez">
+                                                    <label for="example-text-input-floating">Teléfono (solo numeros)</label>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-md-4 mb-4">
