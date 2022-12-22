@@ -234,10 +234,10 @@ const guardarSolicitud = () => {
 
 const cerrarSolicitud = () => {
     if (solicitud_en_curso.id) {
-      const myModal = new bootstrap.Modal(document.getElementById('modal-block-slideleft'),{
-        focus:true,
-      });
-      myModal.show();
+        const myModal = new bootstrap.Modal(document.getElementById('modal-block-slideleft'),{
+            focus:true,
+        });
+        myModal.show();
     }
 }
 
@@ -290,6 +290,10 @@ const Limpiar = () =>{
     document.querySelector( "#btabs-animated-slideup-home-tab" ).click();
 }
 
+const ordenarTripulacion = () => {
+    tripulacion.value.sort((x, y) => x.idTipoFuncionario - y.idTipoFuncionario);
+}
+
 const setAmbulancias = (Arrays) => {
     for (var i = 0; i < Arrays.length; i++) {
         if(Arrays[i].Cometidos[0] == undefined){
@@ -316,7 +320,6 @@ const anularCometido = (data,ubicacion) => {
         'resp': responsable.value,
     };
     axios.put('https://'+url+'/api/cometidos/delete/'+data.Cometidos[0].id,params,config).then((response) => {
-        console.log(ambulancias_disponibles);
         for (let i = 0; i < params.tripulacion.length; i++) {
             const functrip = tripulacion.value.find( TR => TR.idFuncionario == params.tripulacion[i].idFuncionario );
             if(functrip){
@@ -325,14 +328,18 @@ const anularCometido = (data,ubicacion) => {
                 tripulacion.value.push(params.tripulacion[i]);
             }
         }
+        ordenarTripulacion();
         const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find( SOL => SOL.id == solicitud_en_curso.id));
         const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == data.id));
-        const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find( COM => COM.id == params.idCometido));
+        console.log('indexAMB = ' + indexAMB);
         ambulancias_disponibles.value[indexAMB].despacho = null;
         ambulancias_disponibles.value[indexAMB].Cometidos = [ { 'idSolicitud' : null, 'tripulacionCometidos' : [] } ];
+
+        const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find( COM => COM.id == params.idCometido));
         solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido,1);
+        console.log("ambulancias_disponibles = ",ambulancias_disponibles.value);
+
         alertSuccess();
-        console.log(solicitudes.value);
     }).catch(function (error) {
         // console.log(error.response.data.msg);
         // window.location.assign('https://www.ssarica.cl');
@@ -479,7 +486,7 @@ onMounted(() => {
                                             </div>
                                             <div class="col-12 col-md-4 mb-4">
                                                 <div class="form-floating mt-4" v-show="solicitud_en_curso.tipo_llamada == 1">
-                                                    <input type="number" class="form-control" id="example-text-input-floating" v-model="solicitud_en_curso.telefono" name="example-text-input-floating" placeholder="Juan Perez">
+                                                    <input type="number" min="1" pattern="[^-]" class="form-control" id="example-text-input-floating" v-model.number="solicitud_en_curso.telefono" name="example-text-input-floating" placeholder="Juan Perez">
                                                     <label for="example-text-input-floating">Teléfono (solo numeros)</label>
                                                 </div>
                                             </div>
