@@ -21,7 +21,8 @@ store.setLayout({
 store.headerStyle({ mode: "dark" });
 store.mainContent({ mode: "narrow" });
 let encode = "";
-if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.74:3000") {
+console.log(window.document.location.host);
+if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.74:3000") {
 
   if(window.document.location.host === "10.8.83.74:3000"){
     url = '10.8.83.74:8000';

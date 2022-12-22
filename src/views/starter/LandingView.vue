@@ -23,13 +23,14 @@ const alertSuccess = () =>{
 }
 let url = '';
 let boucher = '';
-if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+const responsable = ref();
+if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.72:3000") {
     if(window.document.location.host === "10.8.83.72:3000"){
         url = '10.8.83.72:8000';
         boucher = 'https://10.8.83.72:3000';
     }else{
         url = 'localhost:8000';
-        boucher = 'https://127.0.0.1:3000';
+        boucher = 'https://localhost:3000';
     }
 }else{
     boucher = 'https://www.ssarica.cl/AP_SAMU';
@@ -172,6 +173,7 @@ const guardarSolicitud = () => {
                 contacto  : solicitud_en_curso.contacto,
                 referencia : solicitud_en_curso.referencia,
                 motivo : solicitud_en_curso.motivo,
+                resp_crea: responsable.value,
             };
             if (solicitud_en_curso.id) {
             // Actualiza la solicitud
@@ -241,7 +243,7 @@ const cerrarSolicitud = () => {
 
 const anularSolicitud = () => {
     if (solicitud_en_curso.obs_cierre && solicitud_en_curso.id) {
-        axios.put('https://'+url+'/api/solicitud/cerrar/'+solicitud_en_curso.id, { motivoCierre: solicitud_en_curso.obs_cierre },config).then((response) => {
+        axios.put('https://'+url+'/api/solicitud/cerrar/'+solicitud_en_curso.id, { motivoCierre: solicitud_en_curso.obs_cierre, resp: responsable.value, },config).then((response) => {
             const indice = solicitudes.value.indexOf(solicitudes.value.find(s => s.id == solicitud_en_curso.id));
             const cometidos = solicitudes.value[indice].Cometidos;
             for (let i = 0; i < cometidos.length; i++) {
@@ -305,11 +307,13 @@ const anularCometido = (data,ubicacion) => {
     if(ubicacion){
         data.id = data.Cometidos[0].idAmbulancia;
     }
+    console.log("data = ", data);
     const params = {
         'idSolicitud': solicitud_en_curso.id,
         'tripulacion': data.Cometidos[0].tripulacionCometidos,
         'idAmbulancia': data.id,
-        'idCometido': data.Cometidos[0].id
+        'idCometido': data.Cometidos[0].id,
+        'resp': responsable.value,
     };
     axios.put('https://'+url+'/api/cometidos/delete/'+data.Cometidos[0].id,params,config).then((response) => {
         console.log(ambulancias_disponibles);
@@ -324,17 +328,14 @@ const anularCometido = (data,ubicacion) => {
         const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find( SOL => SOL.id == solicitud_en_curso.id));
         const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == data.id));
         const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find( COM => COM.id == params.idCometido));
-        console.log(indexCometido);
         ambulancias_disponibles.value[indexAMB].despacho = null;
         ambulancias_disponibles.value[indexAMB].Cometidos = [ { 'idSolicitud' : null, 'tripulacionCometidos' : [] } ];
-        console.log(solicitudes.value);
-        console.log(solicitudes.value[indexSolicitud].Cometidos[indexCometido]);
         solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido,1);
         alertSuccess();
         console.log(solicitudes.value);
     }).catch(function (error) {
-        console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
+        // console.log(error.response.data.msg);
+        // window.location.assign('https://www.ssarica.cl');
     });
 }
 
@@ -357,7 +358,9 @@ onMounted(() => {
         window.location.assign('https://www.ssarica.cl');
     });
     axios.get('https://'+url+'/api/Turno/disponibles',config).then((response) => {
-        tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
+        if(response.data['TurnoDisponible']){
+            tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
+        }
     }).catch(function (error) {
         console.log(error.response.data.msg);
         window.location.assign('https://www.ssarica.cl');
@@ -367,6 +370,13 @@ onMounted(() => {
     }).catch(function (error) {
         console.log(error.response.data.msg);
         window.location.assign('https://www.ssarica.cl');
+    });
+    axios.post("https://"+url+"/api/auth/login",{key: localStorage.getItem('key')}).then((response) => {
+        responsable.value = response.data['funcionario'].id;
+        console.log(response.data['funcionario']);
+    }).catch(function (error) {
+        console.log(error.response.data.msg);
+        // window.location.assign('https://www.ssarica.cl');
     });
 });
 

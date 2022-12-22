@@ -13,7 +13,7 @@ let toast = Swal.mixin({
   },
 });
 let url = '';
-if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.72:3000") {
   if(window.document.location.host === "10.8.83.72:3000"){
     url = '10.8.83.72:8000';
   }else{
@@ -117,7 +117,7 @@ function GuardarTurno(){
     }
 
     console.log(params);
-
+    console.log('https://'+url+'/api/Turno');
     axios.post('https://'+url+'/api/Turno',params,config).then((response) => {
         console.log(response.data);
         btnLoading.value = false;

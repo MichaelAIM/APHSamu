@@ -5,7 +5,7 @@ import moment from 'moment';
 
 import axios from 'axios';
 let url = '';
-if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.72:3000") {
   if(window.document.location.host === "10.8.83.72:3000"){
     url = '10.8.83.72:8000';
   }else{
@@ -14,6 +14,7 @@ if (window.document.location.host === "127.0.0.1:3000" || window.document.locati
 }else{
     url = 'www.ssarica.cl:8000';
 }
+console.log(url);
 const config = {
     headers:{
         'x-token': localStorage.getItem('uid')
@@ -58,7 +59,7 @@ onMounted(()=>{
         solicitud.Cometidos = data.Cometidos
     }).catch(function (error) {
       console.log(error.response.data.msg);
-      window.location.assign('https://www.ssarica.cl');
+      // window.location.assign('https://www.ssarica.cl');
     });
 });
 
