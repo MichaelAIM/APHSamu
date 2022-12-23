@@ -221,7 +221,8 @@ const guardarSolicitud = () => {
                     console.log(arrSolicitud);
                 }).catch(function (error) {
                     console.log(error.response.data.msg);
-                    window.location.assign('https://www.ssarica.cl');
+                    toast.fire("Oops...", "Error no se guardó su solicitud", "error");             
+                    // window.location.assign('https://www.ssarica.cl');
                 });
             }
         }else{
@@ -387,6 +388,7 @@ onMounted(() => {
         console.log(error.response.data.msg);
         // window.location.assign('https://www.ssarica.cl');
     });
+    document.querySelector( "#btabs-animated-slideup-home-tab" ).click();
 });
 
 </script>
