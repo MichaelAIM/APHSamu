@@ -39,6 +39,7 @@
     patente:"",
     estado:null,
     logAmbulancias:[],
+    despacho:null,
     tipo:1,
     motivo:"",
   });
@@ -47,6 +48,7 @@
     ambulancia_editar.value.id = amb.id;
     ambulancia_editar.value.movil = amb.movil;
     ambulancia_editar.value.patente = amb.patente;
+    ambulancia_editar.value.despacho = amb.despacho;
     ambulancia_editar.value.estado = amb.estado;
     ambulancia_editar.value.logAmbulancias = amb.logAmbulancias;
     ambulancia_editar.value.tipo = amb.tipo;
@@ -110,33 +112,38 @@
     ambulancia_editar.value.movil = "";
     ambulancia_editar.value.patente = "";
     ambulancia_editar.value.estado = null;
+    ambulancia_editar.value.despacho = null;
     ambulancia_editar.value.logAmbulancias = [];
     ambulancia_editar.value.tipo = 1;
     ambulancia_editar.value.motivo = "";
   }
 
   const Desactivar = () => {
-    if(ambulancia_editar.value.motivo.length > 1 && ambulancia_editar.value.id){
-      //eviar al controlador
-      const params = {
-        motivo:ambulancia_editar.value.motivo,
-        resp:responsable.value
-      }
-      axios.put('https://'+url+'/api/ambulancia/estados/'+ambulancia_editar.value.id,params,config).then((response) => {
-        response.data['ambLOG']['Funcionario'] = response.data['funcionario'];
-        ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].estado = 2;
-        ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].logAmbulancias.push(response.data['ambLOG']);
-        toast.fire(
-          "Excelente!",
-          "Se realizó n exito.",
-          "success"
-        );
-      }).catch(function (error) {
-          console.log(error.response.data.msg);
-          window.location.assign('https://www.ssarica.cl');
-      });
+    if (ambulancia_editar.value.despacho) {
+      toast.fire("Oops...", "La abulancia tiene un cometido activo, no se puede desactivar", "error");
     }else{
-        toast.fire("Oops...", "Debe ingresar un motivo para desactivar", "error");
+      if(ambulancia_editar.value.motivo.length > 1 && ambulancia_editar.value.id){
+        //eviar al controlador
+        const params = {
+          motivo:ambulancia_editar.value.motivo,
+          resp:responsable.value
+        }
+        axios.put('https://'+url+'/api/ambulancia/estados/'+ambulancia_editar.value.id,params,config).then((response) => {
+          response.data['ambLOG']['Funcionario'] = response.data['funcionario'];
+          ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].estado = 2;
+          ambulancias_disponibles.value[ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find( AD => AD.id == ambulancia_editar.value.id))].logAmbulancias.push(response.data['ambLOG']);
+          toast.fire(
+            "Excelente!",
+            "Se realizó n exito.",
+            "success"
+          );
+        }).catch(function (error) {
+            console.log(error.response.data.msg);
+            window.location.assign('https://www.ssarica.cl');
+        });
+      }else{
+          toast.fire("Oops...", "Debe ingresar un motivo para desactivar", "error");
+      }
     }
   }
 
