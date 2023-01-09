@@ -56,10 +56,12 @@ const solicitud_en_curso = reactive({
     lugar: "",
     referencia: "",
     motivo: "",
-    diabetico: null,
-    hipertenso: null,
-    postrado: null,
-    epileptico: null,
+    nom_paciente:"NN",
+    edad_paciente: 0,
+    diabetico: false,
+    hipertenso: false,
+    postrado: false,
+    epileptico: false,
     qtrs: [
         { numero: 1, createdAt: "" },
         { numero: 2, createdAt: "" }
@@ -101,7 +103,7 @@ const Despacho = (data, accion) => {
                     if (accion === 1) {
                         const params = {
                             'idSolicitud': solicitud_en_curso.id,
-                            'nombrePaciente': 'NN',
+                            'nom_paciente': solicitud_en_curso.nom_paciente,
                             'tripulacion': data.Cometidos[0].tripulacionCometidos,
                             'idAmbulancia': data.id
                         }
@@ -144,6 +146,7 @@ const cargarSolicitud = (data) => {
     solicitud_en_curso.tipo_llamada = data.tipo_llamada;
     solicitud_en_curso.telefono = data.telefono;
     solicitud_en_curso.origen = data.origen;
+    solicitud_en_curso.n_paciente = data.n_paciente;
     solicitud_en_curso.contacto = data.contacto;
     solicitud_en_curso.estado = data.estado;
     solicitud_en_curso.n_paciente = data.n_paciente;
@@ -151,6 +154,12 @@ const cargarSolicitud = (data) => {
     solicitud_en_curso.referencia = data.referencia;
     solicitud_en_curso.motivo = data.motivo;
     solicitud_en_curso.obs_cierre = "";
+    solicitud_en_curso.nom_paciente = data.nom_paciente;
+    solicitud_en_curso.edad_paciente = data.edad_paciente;
+    solicitud_en_curso.diabetico = data.diabetico;
+    solicitud_en_curso.hipertenso = data.hipertenso;
+    solicitud_en_curso.postrado = data.postrado;
+    solicitud_en_curso.epileptico = data.epileptico;
     cleanAmbulancias();
     if (data.Cometidos !== undefined) {
         for (var x = 0; x < data.Cometidos.length; x++) {
@@ -172,12 +181,19 @@ const guardarSolicitud = () => {
                 tipo_llamada: solicitud_en_curso.tipo_llamada,
                 telefono: solicitud_en_curso.telefono,
                 origen: solicitud_en_curso.origen,
+                n_paciente: solicitud_en_curso.n_paciente,
                 estadoId: 1,
                 lugar: solicitud_en_curso.lugar,
                 contacto: solicitud_en_curso.contacto,
                 referencia: solicitud_en_curso.referencia,
                 motivo: solicitud_en_curso.motivo,
                 resp_crea: responsable.value,
+                edad_paciente: solicitud_en_curso.edad_paciente,
+                nom_paciente: solicitud_en_curso.nom_paciente,
+                diabetico: solicitud_en_curso.diabetico,
+                hipertenso: solicitud_en_curso.hipertenso,
+                postrado: solicitud_en_curso.postrado,
+                epileptico: solicitud_en_curso.epileptico,
             };
             if (solicitud_en_curso.id) {
                 // Actualiza la solicitud
@@ -186,10 +202,17 @@ const guardarSolicitud = () => {
                     solicitudes.value[index].tipo_llamada = response.data.tipo_llamada;
                     solicitudes.value[index].telefono = response.data.telefono;
                     solicitudes.value[index].origen = response.data.origen;
+                    solicitudes.value[index].n_paciente = response.data.n_paciente;
                     solicitudes.value[index].lugar = response.data.lugar;
                     solicitudes.value[index].contacto = response.data.contacto;
                     solicitudes.value[index].referencia = response.data.referencia;
                     solicitudes.value[index].motivo = response.data.motivo;
+                    solicitudes.value[index].edad_paciente = response.data.edad_paciente;
+                    solicitudes.value[index].nom_paciente = response.data.nom_paciente;
+                    solicitudes.value[index].diabetico = response.data.diabetico;
+                    solicitudes.value[index].hipertenso = response.data.hipertenso;
+                    solicitudes.value[index].postrado = response.data.postrado;
+                    solicitudes.value[index].epileptico = response.data.epileptico;
                     alertSuccess();
                 }).catch(function (error) {
                     console.log(error.response.data.msg);
@@ -275,21 +298,27 @@ const anularSolicitud = () => {
 }
 
 const Limpiar = () => {
-    solicitud_en_curso.id = null,
-        solicitud_en_curso.qtrs = [
-            { numero: 1, createdAt: "" },
-            { numero: 2, createdAt: "" }
-        ],
-        solicitud_en_curso.tipo_llamada = null,
-        solicitud_en_curso.telefono = "",
-        solicitud_en_curso.origen = 0,
-        solicitud_en_curso.contacto = "",
-        solicitud_en_curso.estado = null,
-        solicitud_en_curso.n_paciente = 0,
-        solicitud_en_curso.lugar = "",
-        solicitud_en_curso.referencia = "",
-        solicitud_en_curso.motivo = "",
-        solicitud_en_curso.tripulacion = [];
+    solicitud_en_curso.id = null;
+    solicitud_en_curso.qtrs = [
+        { numero: 1, createdAt: "" },
+        { numero: 2, createdAt: "" }
+    ];
+    solicitud_en_curso.tipo_llamada = null;
+    solicitud_en_curso.telefono = "";
+    solicitud_en_curso.origen = 0;
+    solicitud_en_curso.contacto = "";
+    solicitud_en_curso.estado = null;
+    solicitud_en_curso.n_paciente = 1;
+    solicitud_en_curso.lugar = "";
+    solicitud_en_curso.referencia = "";
+    solicitud_en_curso.motivo = "";
+    solicitud_en_curso.diabetico = false;
+    solicitud_en_curso.hipertenso = false;
+    solicitud_en_curso.postrado = false;
+    solicitud_en_curso.epileptico = false;
+    solicitud_en_curso.nom_paciente = "NN";
+    solicitud_en_curso.edad_paciente = 0;
+    solicitud_en_curso.tripulacion = [];
     solicitud_en_curso.obs_cierre = "";
     cleanAmbulancias();
     document.querySelector("#btabs-animated-slideup-home-tab").click();
@@ -444,7 +473,6 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="block-content tab-content overflow-hidden">
-
                         <div class="tab-pane px-0 fade fade-up active show" id="btabs-animated-slideup-home"
                             role="tabpanel" aria-labelledby="btabs-animated-slideup-home-tab">
                             <div class="block-content tab-pane" id="btabs-vertical-home" role="tabpanel"
@@ -587,23 +615,23 @@ onMounted(() => {
                                                     <input type="text" class="form-control"
                                                         id="example-text-input-floating"
                                                         v-model="solicitud_en_curso.referencia"
-                                                        name="example-text-input-floating" placeholder="John Doe">
+                                                        name="example-text-input-floating">
                                                     <label for="example-text-input-floating">Referencia del lugar
                                                         corto</label>
                                                 </div>
                                             </div>
 
-                                            <div class="col-12 col-md-9 mb-4">
+                                            <div class="col-12 col-md-9 mb-4" v-show="solicitud_en_curso.n_paciente == 1">
                                                 <div class="form-floating ">
-                                                    <input type="text" class="form-control" id="example-text-input-floating"
-                                                        name="example-text-input-floating" placeholder="John Doe">
+                                                    <input type="text" class="form-control" v-model="solicitud_en_curso.nom_paciente" id="example-text-input-floating"
+                                                        name="example-text-input-floating">
                                                     <label for="example-text-input-floating">Nombre Paciente</label>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-3 mb-4">
+                                            <div class="col-12 col-md-3 mb-4" v-show="solicitud_en_curso.n_paciente == 1">
                                                 <div class="form-floating ">
-                                                    <input type="number" class="form-control" id="example-text-input-floating"
-                                                        name="example-text-input-floating" placeholder="Edad">
+                                                    <input type="number" class="form-control" v-model="solicitud_en_curso.edad_paciente" id="example-text-input-floating"
+                                                        name="example-text-input-floating">
                                                     <label for="example-text-input-floating">Edad</label>
                                                 </div>
                                             </div>

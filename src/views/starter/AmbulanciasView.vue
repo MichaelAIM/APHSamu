@@ -22,7 +22,7 @@
   };
   const responsable = ref();
   let url = '';
-  if (window.document.location.host === "127.0.0.1:3000" || window.document.location.host === "10.8.83.72:3000") {
+if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.72:3000") {
     if(window.document.location.host === "10.8.83.72:3000"){
       url = '10.8.83.72:8000';
     }else{
