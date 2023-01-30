@@ -51,7 +51,6 @@ const solicitud_en_curso = reactive({
     telefono: null,
     origen: 0,
     contacto: "",
-    estado: 0,
     n_paciente: 1,
     lugar: "",
     referencia: "",
@@ -101,29 +100,34 @@ const Despacho = (data, accion) => {
                 if (result.value) {
                     //Crear Cometido
                     if (accion === 1) {
-                        const params = {
-                            'idSolicitud': solicitud_en_curso.id,
-                            'nom_paciente': solicitud_en_curso.nom_paciente,
-                            'tripulacion': data.Cometidos[0].tripulacionCometidos,
-                            'idAmbulancia': data.id
-                        }
-                        axios.post('https://' + url + '/api/cometidos', params, config).then((response) => {
-                            response.data['cometido']['tripulacionCometidos'] = params.tripulacion;
-                            const rspTripCometido = response.data['cometido']['tripulacionCometidos'];
-                            for (let i = 0; i < rspTripCometido.length; i++) {
-                                rspTripCometido[i]['idTripTurno'] = rspTripCometido[i].id;
+                        if (solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo && solicitud_en_curso.qtrs[1].createdAt !== "") {    
+                            const params = {
+                                'idSolicitud': solicitud_en_curso.id,
+                                'nom_paciente': solicitud_en_curso.nom_paciente,
+                                'tripulacion': data.Cometidos[0].tripulacionCometidos,
+                                'idAmbulancia': data.id
                             }
-                            const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
-                            ambulancias_disponibles.value[indexAMB].despacho = true;
-                            ambulancias_disponibles.value[indexAMB].Cometidos[0].idSolicitud = solicitud_en_curso.id;
-                            ambulancias_disponibles.value[indexAMB].Cometidos[0]['id'] = response.data['cometido'].id;
-                            solicitudes.value[solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id))].Cometidos.push(response.data['cometido']);
-                            alertSuccess();
-                            window.open(boucher + '/#/boucher/' + solicitud_en_curso.id);
-                        }).catch(function (error) {
-                            console.log(error.response.data.msg);
-                            window.location.assign('https://www.ssarica.cl');
-                        });
+                            axios.post('https://' + url + '/api/cometidos', params, config).then((response) => {
+                                response.data['cometido']['tripulacionCometidos'] = params.tripulacion;
+                                const rspTripCometido = response.data['cometido']['tripulacionCometidos'];
+                                for (let i = 0; i < rspTripCometido.length; i++) {
+                                    rspTripCometido[i]['idTripTurno'] = rspTripCometido[i].id;
+                                }
+                                const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
+                                ambulancias_disponibles.value[indexAMB].despacho = true;
+                                ambulancias_disponibles.value[indexAMB].Cometidos[0].idSolicitud = solicitud_en_curso.id;
+                                ambulancias_disponibles.value[indexAMB].Cometidos[0]['id'] = response.data['cometido'].id;
+                                solicitudes.value[solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id))].Cometidos.push(response.data['cometido']);
+                                alertSuccess();
+                                window.open(boucher + '/#/boucher/' + solicitud_en_curso.id);
+                            }).catch(function (error) {
+                                console.log(error.response.data.msg);
+                                window.location.assign('https://www.ssarica.cl');
+                            });
+
+                        } else {
+                            toast.fire("Oops...", "Debe rellenar todos los campos marcados con * en la solicitud", "error");
+                        }
                     }
                     //Cancelar Cometido
                     else {
@@ -175,14 +179,12 @@ const cargarSolicitud = (data) => {
 }
 
 const guardarSolicitud = () => {
-    if (solicitud_en_curso.qtrs[0].createdAt !== "" && solicitud_en_curso.qtrs[1].createdAt !== "") {
-        if (solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo) {
+    if (solicitud_en_curso.qtrs[0].createdAt !== "") {
             const arrSolicitud = {
                 tipo_llamada: solicitud_en_curso.tipo_llamada,
                 telefono: solicitud_en_curso.telefono,
                 origen: solicitud_en_curso.origen,
                 n_paciente: solicitud_en_curso.n_paciente,
-                estadoId: 1,
                 lugar: solicitud_en_curso.lugar,
                 contacto: solicitud_en_curso.contacto,
                 referencia: solicitud_en_curso.referencia,
@@ -252,9 +254,6 @@ const guardarSolicitud = () => {
                     // window.location.assign('https://www.ssarica.cl');
                 });
             }
-        } else {
-            toast.fire("Oops...", "Debe rellenar todos los campos marcados con *", "error");
-        }
     } else {
         toast.fire("Oops...", "Debe ingresar los QTRs", "error");
     }
@@ -299,27 +298,28 @@ const anularSolicitud = () => {
 
 const Limpiar = () => {
     solicitud_en_curso.id = null;
-    solicitud_en_curso.qtrs = [
-        { numero: 1, createdAt: "" },
-        { numero: 2, createdAt: "" }
-    ];
     solicitud_en_curso.tipo_llamada = null;
-    solicitud_en_curso.telefono = "";
+    solicitud_en_curso.telefono = null;
     solicitud_en_curso.origen = 0;
     solicitud_en_curso.contacto = "";
-    solicitud_en_curso.estado = null;
     solicitud_en_curso.n_paciente = 1;
     solicitud_en_curso.lugar = "";
     solicitud_en_curso.referencia = "";
     solicitud_en_curso.motivo = "";
+    solicitud_en_curso.nom_paciente = "NN";
+    solicitud_en_curso.edad_paciente = 0;
     solicitud_en_curso.diabetico = false;
     solicitud_en_curso.hipertenso = false;
     solicitud_en_curso.postrado = false;
-    solicitud_en_curso.epileptico = false;
-    solicitud_en_curso.nom_paciente = "NN";
-    solicitud_en_curso.edad_paciente = 0;
+    solicitud_en_curso.epileptico = false;    
+    solicitud_en_curso.Cometidos = [];
     solicitud_en_curso.tripulacion = [];
+    solicitud_en_curso.qtrs = [
+        { numero: 1, createdAt: "" },
+        { numero: 2, createdAt: "" }
+    ];
     solicitud_en_curso.obs_cierre = "";
+
     cleanAmbulancias();
     document.querySelector("#btabs-animated-slideup-home-tab").click();
 }
@@ -395,7 +395,7 @@ const cleanAmbulancias = () => {
 onMounted(() => {
     axios.get('https://' + url + '/api/solicitud/disponibles', config).then((response) => {
         solicitudes.value = response.data['solicitudes'];
-        document.querySelector("#btabs-animated-slideup-home-tab").click();
+        // document.querySelector("#btabs-animated-slideup-home-tab").click();
     }).catch(function (error) {
         console.log(error.response.data.msg);
         window.location.assign('https://www.ssarica.cl');
@@ -452,14 +452,8 @@ onMounted(() => {
                                     <span v-if="solicitud_en_curso.id != null">{{solicitud_en_curso.id}}</span> <span
                                         v-else>S/N</span> </button>
                             </li>
-                            <!-- <li class="nav-item">
-                                <button class="nav-link" id="btabs-animated-slideup-profile-tab" data-bs-toggle="tab"
-                                    data-bs-target="#btabs-animated-slideup-profile" role="tab"
-                                    aria-controls="btabs-animated-slideup-profile" aria-selected="true">
-                                    Paciente</button>
-                            </li> -->
                             <li class="nav-item">
-                                <button class="nav-link" id="btabs-animated-slideup-profile-tab" data-bs-toggle="tab"
+                                <button class="nav-link" id="btabs-animated-slideup-settings-tab" data-bs-toggle="tab"
                                     data-bs-target="#btabs-animated-slideup-settings" role="tab"
                                     aria-controls="btabs-animated-slideup-settings" aria-selected="true"> Despachar
                                     Cometido </button>
@@ -473,10 +467,8 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="block-content tab-content overflow-hidden">
-                        <div class="tab-pane px-0 fade fade-up active show" id="btabs-animated-slideup-home"
-                            role="tabpanel" aria-labelledby="btabs-animated-slideup-home-tab">
-                            <div class="block-content tab-pane" id="btabs-vertical-home" role="tabpanel"
-                                aria-labelledby="btabs-vertical-home-tab">
+                        <div class="tab-pane px-0 fade fade-up active show" id="btabs-animated-slideup-home" role="tabpanel" aria-labelledby="btabs-animated-slideup-home-tab">
+                            <div class="block-content tab-pane" id="btabs-vertical-home" role="tabpanel" aria-labelledby="btabs-vertical-home-tab">
                                 <div class="row justify-content-center py-sm-3 py-md-0">
                                     <div class="col-sm-12 mt-2">
                                         <div class="row">
@@ -718,132 +710,8 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-
-                        <div class="tab-pane px-0 fade fade-up" id="btabs-animated-slideup-profile" role="tabpanel"
-                            aria-labelledby="btabs-animated-slideup-profile-tab">
-                            <div class="block-content tab-pane" id="btabs-vertical-profile" role="tabpanel"
-                                aria-labelledby="btabs-vertical-profile-tab">
-                                <div class="row">
-                                    <div class="col-12 col-md-4 mb-4">
-                                        <div class="form-floating ">
-                                            <input type="text" class="form-control" id="example-text-input-floating"
-                                                name="example-text-input-floating" placeholder="John Doe">
-                                            <label for="example-text-input-floating">Run</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-8 mb-4">
-                                        <div class="form-floating ">
-                                            <input type="text" class="form-control" id="example-text-input-floating"
-                                                name="example-text-input-floating" placeholder="John Doe">
-                                            <label for="example-text-input-floating">Nombre Paciente</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-3 mb-4">
-                                        <div class="form-floating ">
-                                            <input type="number" class="form-control" id="example-text-input-floating"
-                                                name="example-text-input-floating" placeholder="Edad">
-                                            <label for="example-text-input-floating">Edad</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-4">
-                                        <div class="form-floating">
-                                            <select class="form-select" id="example-select-floating"
-                                                name="example-select-floating2"
-                                                aria-label="Floating label select example">
-                                                <option>Seleccione</option>
-                                                <option value="1">Femenino</option>
-                                                <option value="2">Masculino</option>
-                                                <option value="3">Otro</option>
-                                            </select><label for="example-select-floating">Sexo</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-5 mb-">
-                                        <div class="form-floating">
-                                            <select class="form-select" id="example-select-floating"
-                                                name="example-select-floating2"
-                                                aria-label="Floating label select example">
-                                                <option>Seleccione</option>
-                                                <option value="1">Provida</option>
-                                                <option value="2">Habitad</option>
-                                                <option value="3">Otro</option>
-                                            </select><label for="example-select-floating">Previsión</label>
-                                        </div>
-                                    </div>
-                                    <label class="form-label">Condición del Paciente</label>
-                                    <div class="col-2">
-                                        <div class="form-check form-block">
-                                            <input type="radio" class="form-check-input" id="example-radio-block10"
-                                                name="example-radio-block1">
-                                            <label class="form-check-label" for="example-radio-block10">
-                                                <span class="d-block fw-normal text-center">
-                                                    <span class="d-block fs-sm text-muted">Vivo</span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-3 mb-4">
-                                        <div class="form-check form-block">
-                                            <input type="radio" class="form-check-input" id="example-radio-block11"
-                                                name="example-radio-block1">
-                                            <label class="form-check-label" for="example-radio-block11">
-                                                <span class="d-block fw-normal text-center">
-                                                    <span class="d-block fs-sm text-muted">Fallecido</span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-7 mb-">
-                                        <div class="form-floating">
-                                            <select class="form-select" id="example-select-floating"
-                                                name="example-select-floating2"
-                                                aria-label="Floating label select example">
-                                                <option>Seleccione</option>
-                                                <option value="1">Insuficiencia Respiratoría</option>
-                                                <option value="2">Habitad</option>
-                                                <option value="3">Otro</option>
-                                            </select><label for="example-select-floating">Patología</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto text-white block">
-                                        <div class="block-header px-0">
-                                            <p class="px-3 py-1 bg-info mb-0 border-info border border-2">Insuficiencia
-                                                Respiratoria</p>
-                                            <div
-                                                class="block-options space-x-1 border border-2 border-start-0 px-3 py-1">
-                                                <button type="button" class="btn-block-option">
-                                                    <i class="far fa-trash-can"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto text-white block">
-                                        <div class="block-header px-0">
-                                            <p class="px-3 py-1 bg-info mb-0 border-info border border-2">Plitraumatismo
-                                            </p>
-                                            <div
-                                                class="block-options space-x-1 border border-2 border-start-0 px-3 py-1">
-                                                <button type="button" class="btn-block-option">
-                                                    <i class="far fa-trash-can"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-floating mb-4">
-                                            <textarea class="form-control" id="example-textarea-floating"
-                                                name="example-textarea-floating" placeholder="Leave a comment here"
-                                                style="height: 200px;"></textarea>
-                                            <label for="example-textarea-floating">Observación</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane px-0 fade fade-up" id="btabs-animated-slideup-settings" role="tabpanel"
-                            aria-labelledby="btabs-animated-slideup-settings-tab">
-                            <div class="block-content tab-pane" id="btabs-vertical-settings" role="tabpanel"
-                                aria-labelledby="btabs-vertical-settings-tab">
+                        <div class="tab-pane px-0 fade fade-up" id="btabs-animated-slideup-settings" role="tabpanel" aria-labelledby="btabs-animated-slideup-settings-tab">
+                            <div class="block-content tab-pane" id="btabs-vertical-settings" role="tabpanel" aria-labelledby="btabs-vertical-settings-tab">
                                 <div class="row mb-5">
                                     <div class="col-6">
                                         <div class="row">
@@ -859,7 +727,7 @@ onMounted(() => {
                                                         Movil {{ad.movil}}
                                                         <a type="button" class="btn btn-sm btn-alt-primary ms-3"
                                                             v-show="ad.despacho != 1" @click="Despacho(ad,1)">
-                                                            Desapachar </a>
+                                                            Despachar </a>
                                                         <a type="button" class="btn btn-sm btn-alt-danger ms-3"
                                                             v-show="ad.despacho == 1" @click="Despacho(ad)"> Cancelar
                                                             despacho </a>
@@ -925,14 +793,12 @@ onMounted(() => {
                 <div class="block-rounded block">
                     <ul class="nav nav-tabs nav-tabs-block bg-flat" role="tablist">
                         <li class="nav-item ms-auto mt-06">
-                            <button class="nav-link active" id="btabs-animated-slideright-home-tab" data-bs-toggle="tab"
-                                data-bs-target="#btabs-animated-slideright-home" role="tab"
+                            <button class="nav-link active" id="btabs-animated-slideright-home-tab" data-bs-toggle="tab" data-bs-target="#btabs-animated-slideright-home" role="tab"
                                 aria-controls="btabs-animated-slideright-home" aria-selected="true">
                                 Sin Despacho </button>
                         </li>
                         <li class="nav-item me-auto mt-06">
-                            <button class="nav-link" id="btabs-animated-slideright-profile-tab" data-bs-toggle="tab"
-                                data-bs-target="#btabs-animated-slideright-profile" role="tab"
+                            <button class="nav-link" id="btabs-animated-slideright-profile-tab" data-bs-toggle="tab" data-bs-target="#btabs-animated-slideright-profile" role="tab"
                                 aria-controls="btabs-animated-slideright-profile" aria-selected="false">
                                 En Cometido </button>
                         </li>

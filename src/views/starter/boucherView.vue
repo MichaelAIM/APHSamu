@@ -32,6 +32,12 @@ const solicitud = reactive({
     lugar:"",
     referencia:"",
     motivo:"",
+    hipertenso:false,
+    epileptico:false,
+    diabetico:false,
+    postrado:false,
+    nom_paciente:"",
+    edad_paciente: 0,
     qtrs:[
         {numero:1, createdAt:""},
         {numero:2, createdAt:""}
@@ -41,8 +47,9 @@ const solicitud = reactive({
 });
 
 onMounted(()=>{
-    axios.get('https://'+url+'/api/solicitud/'+route.params.id,config).then((response) => {
-        const data = response.data['solicitud'];
+  axios.get('https://'+url+'/api/solicitud/'+route.params.id,config).then((response) => {
+    const data = response.data['solicitud'];
+        console.log(response.data['solicitud']);
         solicitud.qtrs = [];
         solicitud.id = data.id;
         solicitud.qtrs = data.Qtrs;
@@ -55,7 +62,13 @@ onMounted(()=>{
         solicitud.lugar = data.lugar;
         solicitud.referencia = data.referencia;
         solicitud.motivo = data.motivo;
+        solicitud.hipertenso = data.hipertenso;
+        solicitud.epileptico = data.epileptico;
+        solicitud.diabetico = data.diabetico;
+        solicitud.postrado = data.postrado;
         solicitud.obs_cierre = "";
+        solicitud.nom_paciente = data.nom_paciente;
+        solicitud.edad_paciente = data.edad_paciente
         solicitud.Cometidos = data.Cometidos
     }).catch(function (error) {
       console.log(error.response.data.msg);
@@ -79,31 +92,47 @@ onMounted(()=>{
             <p> Tipo de Llamada: 
               <strong v-show="solicitud.tipo_llamada==1">Telefónico</strong>
               <strong v-show="solicitud.tipo_llamada==2">VHF</strong>
-              <strong v-show="solicitud.tipo_llamada==3">NO DATA</strong>
+              <strong v-show="solicitud.tipo_llamada==3">Sin datos</strong>
             </p>
             <p>Teléfono: 
               <strong v-show="solicitud.telefono">{{ solicitud.telefono }}</strong>
-              <strong v-show="!solicitud.telefono">NO DATA</strong>
+              <strong v-show="!solicitud.telefono">Sin datos</strong>
             </p>
             <p>Origen: 
               <strong v-show="solicitud.origen">{{ solicitud.origen }}</strong>
-              <strong v-show="!solicitud.origen">NO DATA</strong>
+              <strong v-show="!solicitud.origen">Sin datos</strong>
             </p>
             <p>Contacto: 
               <strong v-show="solicitud.contacto">{{ solicitud.contacto }}</strong>
-              <strong v-show="!solicitud.contacto">NO DATA</strong>
+              <strong v-show="!solicitud.contacto">Sin datos</strong>
             </p>
             <p>Lugar del suceso : 
               <strong v-show="solicitud.lugar">{{ solicitud.lugar }}</strong>
-              <strong v-show="!solicitud.lugar">NO DATA</strong>
+              <strong v-show="!solicitud.lugar">Sin datos</strong>
             </p>
             <p>Lugar de referencia: 
               <strong v-show="solicitud.referencia">{{ solicitud.referencia }}</strong>
-              <strong v-show="!solicitud.referencia">NO DATA</strong>
+              <strong v-show="!solicitud.referencia">Sin datos</strong>
             </p>
+            <p>Nombre Paciente: 
+              <strong v-show="solicitud.nom_paciente">{{ solicitud.nom_paciente }}</strong>
+              <strong v-show="!solicitud.nom_paciente">Sin datos</strong>
+            </p>
+            <p>Edad Paciente: 
+              <strong v-show="solicitud.edad_paciente">{{ solicitud.edad_paciente }}</strong>
+              <strong v-show="!solicitud.edad_paciente">Sin datos</strong>
+            </p>
+            <p>Patologías:</p>
+            <ul>
+              <li v-show="solicitud.diabetico">Diabetico</li>
+              <li v-show="solicitud.hipertenso">Hipertenso</li>
+              <li v-show="solicitud.postrado">Postrado</li>
+              <li v-show="solicitud.epileptico">Epileptico</li>
+            </ul>
+
             <p>Motivo de Consulta: <strong>{{ solicitud.motivo }}</strong></p>
             <h3 class="mb-1">Qtr´s:</h3>
-            <p v-for="qtr in solicitud.qtrs" :key="qtr.id">{{qtr.numero}}: <strong>{{moment(qtr.createdAt).format('DD/MM/YYYY HH:mm:ss')}}</strong></p>
+            <p v-for="qtr in solicitud.qtrs" :key="qtr.id">{{qtr.numero}}:  <strong>{{moment(qtr.createdAt).format('DD/MM/YYYY HH:mm:ss')}}</strong></p>
             <h3 class="mb-1">Cometidos:</h3>
             <ul>
               <li v-for="cometido in solicitud.Cometidos" :key="cometido.id">

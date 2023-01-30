@@ -56,6 +56,8 @@ function toggle(arr,item,ev){
         funcionarios[arr].push(item);
         seleccionados[arr].splice(index,1);
     }else{
+        item.idTipoFuncionario = item.Funcionario.idRol;
+        item.idFuncionario = item.Funcionario.id;
         seleccionados[arr].push(item);
         funcionarios[arr].splice(index2,1);
     }
@@ -126,14 +128,14 @@ function GuardarTurno(){
         console.log(error.response.data.msg);
         // window.location.assign('https://www.ssarica.cl');
     });
-  // toast.fire("Oops...", "Ocurrio un error en el ingreso de los datos. Por favor intente nuevamente!", "error");  
+  toast.fire("Oops...", "Ocurrio un error en el ingreso de los datos. Por favor intente nuevamente!", "error");  
 }
 
 onBeforeMount(() => {
     axios.get('https://'+url+'/api/Turno/disponibles',config).then((response) => {
         if (response.data['TurnoDisponible'].length > 0) {  
             idTurnoAnterior.value = response.data['TurnoDisponible'][0].id;
-            if(idTurnoAnterior != ""){
+            if(idTurnoAnterior.value != ""){
                 console.log(idTurnoAnterior);
                 const trip = response.data['TurnoDisponible'][0].tripulacionTurnos;
                 allTurno.value = trip;
