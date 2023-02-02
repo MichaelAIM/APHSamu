@@ -21,6 +21,7 @@ const boucher = () => import("@/views/starter/boucherView.vue");
 // Inicio: Dashboard
 const Dashboard = () => import("@/views/starter/DashboardView.vue");
 const Turnos = () => import("@/views/starter/TurnoView.vue");
+const Tripulacion = () => import("@/views/starter/TripulacionView.vue");
 
 // Set all routes
 const routes = [
@@ -116,6 +117,18 @@ const routes = [
         path: "boucher/:id",
         name: "boucher",
         component: boucher,
+      },
+    ],
+  },
+  {
+    path: "/",
+    redirect: "/backend/tripulacion",
+    component: LayoutSimple,
+    children: [
+      {
+        path: "tripulacion/:id",
+        name: "tripulacion-dashboard",
+        component: Tripulacion,
       },
     ],
   },

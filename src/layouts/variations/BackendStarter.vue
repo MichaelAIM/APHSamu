@@ -22,6 +22,7 @@ store.headerStyle({ mode: "dark" });
 store.mainContent({ mode: "narrow" });
 let encode = "";
 console.log(window.document.location.host);
+
 if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.74:3000") {
 
   if(window.document.location.host === "10.8.83.74:3000"){
@@ -90,7 +91,7 @@ axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
             {
               name: 'Despachos',
               to: 'despacho-dashboard',
-              icon: 'fa fa-truck-medical',
+              icon: 'fa fa-file-waveform',
             },
             {
               name: 'Mantenedores',
@@ -104,11 +105,11 @@ axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
             {
               name: 'Ambulancias',
               to: 'ambulancia-dashboard',
-              icon: 'fa fa-file-waveform',
+              icon: 'fa fa-truck-medical',
             },
             {
-              name: 'Datos DAP',
-              to: 'backend-dashboard',
+              name: 'Tripulación',
+              to: 'tripulacion-dashboard',
               icon: 'fa fa-truck-medical',
             },
           ]"

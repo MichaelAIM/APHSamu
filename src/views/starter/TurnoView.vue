@@ -4,21 +4,21 @@ import Swal from "sweetalert2";
 import axios from 'axios';
 
 let toast = Swal.mixin({
-  buttonsStyling: false,
-  target: "#page-container",
-  customClass: {
-    confirmButton: "btn btn-success m-1",
-    cancelButton: "btn btn-danger m-1",
-    input: "form-control",
-  },
+    buttonsStyling: false,
+    target: "#page-container",
+    customClass: {
+        confirmButton: "btn btn-success m-1",
+        cancelButton: "btn btn-danger m-1",
+        input: "form-control",
+    },
 });
 let url = '';
 if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.72:3000") {
-  if(window.document.location.host === "10.8.83.72:3000"){
-    url = '10.8.83.72:8000';
-  }else{
-    url = 'localhost:8000';
-  }
+    if(window.document.location.host === "10.8.83.72:3000"){
+        url = '10.8.83.72:8000';
+    }else{
+        url = 'localhost:8000';
+    }
 }else{
     url = 'www.ssarica.cl:8000';
 }
@@ -53,8 +53,26 @@ function toggle(arr,item,ev){
     const index = seleccionados[arr].indexOf(seleccionados[arr].find( Sel => Sel.Funcionario.id == item.Funcionario.id));
     const index2 = funcionarios[arr].indexOf(funcionarios[arr].find( Func => Func.Funcionario.id == item.Funcionario.id));
     if (index != -1) {
-        funcionarios[arr].push(item);
-        seleccionados[arr].splice(index,1);
+        axios.get('https://' + url + '/api/cometidos/disponibles', config).then((response) => {
+            console.log(response.data['cometidos']);
+            if(response.data['cometidos'] !== ""){
+                // alert();
+                response.data['cometidos'].map((cometido) => {
+                    if (cometido.tripulacionCometidos.find( func => func.idFuncionario ==  item.Funcionario.id)) {
+                        toast.fire("Oops...", "No es posible eliminar al funcionario, tiene un cometido en curso", "warning");                        
+                    } else {
+                        funcionarios[arr].push(item);
+                        seleccionados[arr].splice(index,1);
+                    }
+                });
+            }else{
+                funcionarios[arr].push(item);
+                seleccionados[arr].splice(index,1);
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
+
     }else{
         item.idTipoFuncionario = item.Funcionario.idRol;
         item.idFuncionario = item.Funcionario.id;
@@ -80,25 +98,34 @@ const filterConductor = computed(() => {
 });
 // lismpiar el array de funcionarios seleccionados
 function Limpiar(){
-  if (seleccionados["enfermero"] != "") {
-    for (var i = 0; i < seleccionados["enfermero"].length; i++) {
-      funcionarios['enfermero'].push(seleccionados["enfermero"][i]);
-    }
-    seleccionados["enfermero"] = [];
-  }
-  if (seleccionados["tecnico"] != "") {
-    for (var i = 0; i < seleccionados["tecnico"].length; i++) {
-      funcionarios['tecnico'].push(seleccionados["tecnico"][i]);
-    }
-    seleccionados["tecnico"] = [];
-  }
-  if (seleccionados["conductor"] != "") {
-    for (var i = 0; i < seleccionados["conductor"].length; i++) {
-      funcionarios['conductor'].push(seleccionados["conductor"][i]);
-    }
-    seleccionados["conductor"] = [];
-  }
+    axios.get('https://' + url + '/api/cometidos/disponibles', config).then((response) => {
+        if(response.data['cometidos'] !== ""){
+            toast.fire("Oops...", "No es posible eliminar la tripulación, Hay un cometido en curso", "warning");
+        }else{
+            if (seleccionados["enfermero"] != "") {
+                for (var i = 0; i < seleccionados["enfermero"].length; i++) {
+                    funcionarios['enfermero'].push(seleccionados["enfermero"][i]);
+                }
+                seleccionados["enfermero"] = [];
+            }
+            if (seleccionados["tecnico"] != "") {
+                for (var i = 0; i < seleccionados["tecnico"].length; i++) {
+                    funcionarios['tecnico'].push(seleccionados["tecnico"][i]);
+                }
+                seleccionados["tecnico"] = [];
+            }
+            if (seleccionados["conductor"] != "") {
+                for (var i = 0; i < seleccionados["conductor"].length; i++) {
+                    funcionarios['conductor'].push(seleccionados["conductor"][i]);
+                }
+                seleccionados["conductor"] = [];
+            }
+        }
+    }).catch(function (error) {
+        console.log(error.response.data.msg);
+    });
 }
+
 function GuardarTurno(){
     console.log(responsable.value);
     btnLoading.value = true;
@@ -121,14 +148,13 @@ function GuardarTurno(){
     console.log(params);
     console.log('https://'+url+'/api/Turno');
     axios.post('https://'+url+'/api/Turno',params,config).then((response) => {
-        console.log(response.data);
         btnLoading.value = false;
         toast.fire("Excelente!", "El turno fue creado con exito!", "success");
     }).catch(function (error) {
         console.log(error.response.data.msg);
         // window.location.assign('https://www.ssarica.cl');
+        toast.fire("Oops...", "Ocurrio un error en el ingreso de los datos. Por favor intente nuevamente!", "error");  
     });
-  toast.fire("Oops...", "Ocurrio un error en el ingreso de los datos. Por favor intente nuevamente!", "error");  
 }
 
 onBeforeMount(() => {
@@ -136,7 +162,6 @@ onBeforeMount(() => {
         if (response.data['TurnoDisponible'].length > 0) {  
             idTurnoAnterior.value = response.data['TurnoDisponible'][0].id;
             if(idTurnoAnterior.value != ""){
-                console.log(idTurnoAnterior);
                 const trip = response.data['TurnoDisponible'][0].tripulacionTurnos;
                 allTurno.value = trip;
                 for (let i = 0; i < trip.length; i++) {
@@ -190,7 +215,6 @@ onBeforeMount(() => {
 onMounted(() => {
     axios.post("https://"+url+"/api/auth/login",{key: localStorage.getItem('key')}).then((response) => {
         responsable.value = response.data['funcionario'].id;
-        console.log(response.data['funcionario']);
     }).catch(function (error) {
         console.log(error.response.data.msg);
         // window.location.assign('https://www.ssarica.cl');
@@ -211,15 +235,15 @@ onMounted(() => {
                     <div class="block-header block-header-default bg-dark text-white">
                         <h3 class="block-title">Turno de hoy</h3>
                         <div class="block-options space-x-1">
-                          <button type="submit" class="btn btn-sm btn-alt-primary mb-2" @click="GuardarTurno">
+                            <button type="submit" class="btn btn-sm btn-alt-primary mb-2" @click="GuardarTurno">
                             <template v-if="btnLoading">
-                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                              Cargando...
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Cargando...
                             </template>
                             <template v-else>
-                              Guardar turno
+                                Guardar turno
                             </template>
-                          </button>
+                            </button>
                             <button type="reset" class="btn btn-sm btn-alt-info mb-2" @click="Limpiar"> Limpiar </button>
                         </div>
                     </div>
@@ -231,9 +255,9 @@ onMounted(() => {
                                     <div class="col-auto text-white block pe-1 mb-0" v-for="ES in seleccionados.enfermero" :key="ES.Funcionario.id">
                                         <div class="block-header px-0">
                                             <p class="px-3 py-1 bg-info mb-0 border-info border border-2 txt-sm" v-show="ES.Funcionario.nombre">{{ES.Funcionario.nombre}}</p>
-                                              <button type="button" class="btn-block-option btn-sm px-2 border" v-show="ES.Funcionario.nombre" @click="toggle('enfermero',ES,true)">
-                                                  <i class="far fa-trash-can"></i>
-                                              </button>
+                                                <button type="button" class="btn-block-option btn-sm px-2 border" v-show="ES.Funcionario.nombre" @click="toggle('enfermero',ES,true)">
+                                                    <i class="far fa-trash-can"></i>
+                                                </button>
                                             <p v-show="!ES.Funcionario.nombre"> Sin Datos</p>
                                         </div>
                                     </div>

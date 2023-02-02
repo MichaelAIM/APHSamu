@@ -145,186 +145,6 @@ const Despacho = (data, accion) => {
     }
 }
 
-const cargarSolicitud = (data) => {
-    solicitud_en_curso.qtrs = [];
-    solicitud_en_curso.id = data.id;
-    solicitud_en_curso.qtrs = data.Qtrs;
-    solicitud_en_curso.tipo_llamada = data.tipo_llamada;
-    solicitud_en_curso.telefono = data.telefono;
-    solicitud_en_curso.origen = data.origen;
-    solicitud_en_curso.n_paciente = data.n_paciente;
-    solicitud_en_curso.contacto = data.contacto;
-    solicitud_en_curso.estado = data.estado;
-    solicitud_en_curso.n_paciente = data.n_paciente;
-    solicitud_en_curso.lugar = data.lugar;
-    solicitud_en_curso.referencia = data.referencia;
-    solicitud_en_curso.motivo = data.motivo;
-    solicitud_en_curso.obs_cierre = "";
-    solicitud_en_curso.nom_paciente = data.nom_paciente;
-    solicitud_en_curso.edad_paciente = data.edad_paciente;
-    solicitud_en_curso.diabetico = data.diabetico;
-    solicitud_en_curso.hipertenso = data.hipertenso;
-    solicitud_en_curso.postrado = data.postrado;
-    solicitud_en_curso.epileptico = data.epileptico;
-    cleanAmbulancias();
-    if (data.Cometidos !== undefined) {
-        for (var x = 0; x < data.Cometidos.length; x++) {
-            const index = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(f => f.id == data.Cometidos[x].idAmbulancia));
-            if (ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos !== undefined) {
-                ambulancias_disponibles.value[index].Cometidos[0].idSolicitud = data.id;
-                for (var i = 0; i < data.Cometidos[x].tripulacionCometidos.length; i++) {
-                    ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos.push(data.Cometidos[x].tripulacionCometidos[i]);
-                }
-            }
-        }
-    }
-}
-
-const guardarSolicitud = () => {
-    if (solicitud_en_curso.qtrs[0].createdAt !== "") {
-        const arrSolicitud = {
-            tipo_llamada: solicitud_en_curso.tipo_llamada,
-            telefono: solicitud_en_curso.telefono,
-            origen: solicitud_en_curso.origen,
-            n_paciente: solicitud_en_curso.n_paciente,
-            lugar: solicitud_en_curso.lugar,
-            contacto: solicitud_en_curso.contacto,
-            referencia: solicitud_en_curso.referencia,
-            motivo: solicitud_en_curso.motivo,
-            resp_crea: responsable.value,
-            edad_paciente: solicitud_en_curso.edad_paciente,
-            nom_paciente: solicitud_en_curso.nom_paciente,
-            diabetico: solicitud_en_curso.diabetico,
-            hipertenso: solicitud_en_curso.hipertenso,
-            postrado: solicitud_en_curso.postrado,
-            epileptico: solicitud_en_curso.epileptico,
-        };
-        if (solicitud_en_curso.id) {
-            // Actualiza la solicitud
-            axios.put('https://' + url + '/api/solicitud/' + solicitud_en_curso.id, arrSolicitud, config).then((response) => {
-                const index = solicitudes.value.indexOf(solicitudes.value.find(sol => sol.id == response.data.id));
-                solicitudes.value[index].tipo_llamada = response.data.tipo_llamada;
-                solicitudes.value[index].telefono = response.data.telefono;
-                solicitudes.value[index].origen = response.data.origen;
-                solicitudes.value[index].n_paciente = response.data.n_paciente;
-                solicitudes.value[index].lugar = response.data.lugar;
-                solicitudes.value[index].contacto = response.data.contacto;
-                solicitudes.value[index].referencia = response.data.referencia;
-                solicitudes.value[index].motivo = response.data.motivo;
-                solicitudes.value[index].edad_paciente = response.data.edad_paciente;
-                solicitudes.value[index].nom_paciente = response.data.nom_paciente;
-                solicitudes.value[index].diabetico = response.data.diabetico;
-                solicitudes.value[index].hipertenso = response.data.hipertenso;
-                solicitudes.value[index].postrado = response.data.postrado;
-                solicitudes.value[index].epileptico = response.data.epileptico;
-                alertSuccess();
-            }).catch(function (error) {
-                console.log(error.response.data.msg);
-                window.location.assign('https://www.ssarica.cl');
-            });
-        } else {
-            // Inserta nueva  solicitud
-            axios.post('https://' + url + '/api/solicitud', arrSolicitud, config).then((response) => {
-                solicitud_en_curso.id = response.data['solicitud'].id
-                arrSolicitud.id = response.data['solicitud'].id;
-                arrSolicitud.n_paciente = 0;
-                arrSolicitud.obs_cierre = "";
-                arrSolicitud.Cometidos = [];
-                const params = [
-                    {
-                        "numero": solicitud_en_curso.qtrs[0].numero,
-                        "idSolicitud": response.data['solicitud'].id,
-                        "createdAt": solicitud_en_curso.qtrs[0].createdAt
-                    },
-                    {
-                        "numero": solicitud_en_curso.qtrs[1].numero,
-                        "idSolicitud": response.data['solicitud'].id,
-                        "createdAt": solicitud_en_curso.qtrs[1].createdAt
-                    }
-                ];
-                if (response.data['solicitud'].id) {
-                    axios.post('https://' + url + '/api/Qtr/array', params, config).then((resp) => {
-                        arrSolicitud.Qtrs = resp.data["qtr"];
-                        alertSuccess();
-                        solicitudes.value.push(arrSolicitud);
-                    });
-                }
-                console.log(arrSolicitud);
-            }).catch(function (error) {
-                console.log(error.response.data.msg);
-                toast.fire("Oops...", "Error no se guardó su solicitud", "error");
-                // window.location.assign('https://www.ssarica.cl');
-            });
-        }
-    } else {
-        toast.fire("Oops...", "Debe ingresar los QTRs", "error");
-    }
-}
-
-const cerrarSolicitud = () => {
-    if (solicitud_en_curso.id) {
-        const myModal = new bootstrap.Modal(document.getElementById('modal-block-slideleft'), {
-            focus: true,
-        });
-        myModal.show();
-    }
-}
-
-const anularSolicitud = () => {
-    if (solicitud_en_curso.obs_cierre && solicitud_en_curso.id) {
-        axios.put('https://' + url + '/api/solicitud/cerrar/' + solicitud_en_curso.id, { motivoCierre: solicitud_en_curso.obs_cierre, resp: responsable.value, }, config).then((response) => {
-            const indice = solicitudes.value.indexOf(solicitudes.value.find(s => s.id == solicitud_en_curso.id));
-            const cometidos = solicitudes.value[indice].Cometidos;
-            for (let i = 0; i < cometidos.length; i++) {
-                const cero = {
-                    Cometidos: []
-                }
-                cero.Cometidos.push(cometidos[i]);
-                anularCometido(cero, 1);
-            }
-            Limpiar();
-            toast.fire(
-                "Excelente!",
-                "La solicitud se cerró exitosamente.",
-                "success"
-            );
-            solicitudes.value.splice(indice, 1);
-        }).catch(function (error) {
-            console.log(error.response.data.msg);
-            window.location.assign('https://www.ssarica.cl');
-        });
-    } else {
-        toast.fire("Oops...", "Debe ingresar un motivo de cierre", "warning");
-    }
-}
-
-const Limpiar = () => {        
-    solicitud_en_curso.id = null;
-    solicitud_en_curso.tipo_llamada = null;
-    solicitud_en_curso.telefono = null;
-    solicitud_en_curso.origen = 0;
-    solicitud_en_curso.contacto = "";
-    solicitud_en_curso.n_paciente = 1;
-    solicitud_en_curso.lugar = "";
-    solicitud_en_curso.referencia = "";
-    solicitud_en_curso.motivo = "";
-    solicitud_en_curso.nom_paciente = "NN";
-    solicitud_en_curso.edad_paciente = 0;
-    solicitud_en_curso.diabetico = false;
-    solicitud_en_curso.hipertenso = false;
-    solicitud_en_curso.postrado = false;
-    solicitud_en_curso.epileptico = false;    
-    solicitud_en_curso.Cometidos = [];
-    solicitud_en_curso.tripulacion = [];
-    solicitud_en_curso.qtrs = [
-        { numero: 1, createdAt: "" },
-        { numero: 2, createdAt: "" }
-    ];
-    solicitud_en_curso.obs_cierre = "";
-    cleanAmbulancias();
-    document.querySelector("#btabs-animated-slideup-home-tab").click();
-}
-
 const ordenarTripulacion = () => {
     tripulacion.value.sort((x, y) => x.idTipoFuncionario - y.idTipoFuncionario);
 }
@@ -342,47 +162,7 @@ const setAmbulancias = (Arrays) => {
     return Arrays;
 }
 
-const anularCometido = (data, ubicacion) => {
-    let EstadoCom = 2;
-    if (ubicacion) {
-        data.id = data.Cometidos[0].idAmbulancia;
-        EstadoCom = 3;
-    }
-    console.log("data = ", data);
-    const params = {
-        'idSolicitud': solicitud_en_curso.id,
-        'tripulacion': data.Cometidos[0].tripulacionCometidos,
-        'idAmbulancia': data.id,
-        'idCometido': data.Cometidos[0].id,
-        'resp': responsable.value,
-        EstadoCom: EstadoCom
-    };
-    axios.put('https://' + url + '/api/cometidos/delete/' + data.Cometidos[0].id, params, config).then((response) => {
-        for (let i = 0; i < params.tripulacion.length; i++) {
-            const functrip = tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario);
-            if (functrip) {
-                tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario).idEstado = 1;
-            } else {
-                tripulacion.value.push(params.tripulacion[i]);
-            }
-        }
-        ordenarTripulacion();
-        const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id));
-        const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
-        console.log('indexAMB = ' + indexAMB);
-        ambulancias_disponibles.value[indexAMB].despacho = null;
-        ambulancias_disponibles.value[indexAMB].Cometidos = [{ 'idSolicitud': null, 'tripulacionCometidos': [] }];
 
-        const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find(COM => COM.id == params.idCometido));
-        solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido, 1);
-        console.log("ambulancias_disponibles = ", ambulancias_disponibles.value);
-
-        alertSuccess();
-    }).catch(function (error) {
-        // console.log(error.response.data.msg);
-        // window.location.assign('https://www.ssarica.cl');
-    });
-}
 
 const cleanAmbulancias = () => {
     for (let x = 0; x < ambulancias_disponibles.value.length; x++) {
@@ -397,13 +177,6 @@ const cleanAmbulancias = () => {
 }
 
 onMounted(() => {
-    axios.get('https://' + url + '/api/solicitud/disponibles', config).then((response) => {
-        solicitudes.value = response.data['solicitudes'];
-        // document.querySelector("#btabs-animated-slideup-home-tab").click();
-    }).catch(function (error) {
-        console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
-    });
     axios.get('https://' + url + '/api/Turno/disponibles', config).then((response) => {
         if (response.data['TurnoDisponible'].length > 0) {
             tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
@@ -439,7 +212,7 @@ onMounted(() => {
         <template #extra>
             <button type="button" class="btn btn-alt-primary" @click="Limpiar">
                 <i class="fa fa-plus opacity-50 me-1"></i>
-                Nueva Solicitud
+                Configurar Tripulacion
             </button>
         </template>
     </BasePageHeading>
