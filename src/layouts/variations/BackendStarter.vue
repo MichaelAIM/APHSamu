@@ -98,14 +98,14 @@ axios.post("https://"+url+"/api/auth/login",{key: encode}).then((response) => {
               heading: true,
             },
             {
-              name: 'Turnos',
-              to: 'turno-dashboard',
-              icon: 'si si-phone',
-            },
-            {
               name: 'Ambulancias',
               to: 'ambulancia-dashboard',
               icon: 'fa fa-truck-medical',
+            },
+            {
+              name: 'Turnos',
+              to: 'turno-dashboard',
+              icon: 'si si-phone',
             },
             {
               name: 'Tripulación',

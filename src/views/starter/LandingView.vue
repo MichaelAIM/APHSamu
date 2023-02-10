@@ -121,10 +121,8 @@ const Despacho = (data, accion) => {
                                 alertSuccess();
                                 window.open(boucher + '/#/boucher/' + solicitud_en_curso.id);
                             }).catch(function (error) {
-                                console.log(error.response.data.msg);
+                                console.log(error);
                                 toast.fire("Oops...", error, "error");
-
-                                // window.location.assign('https://www.ssarica.cl');
                             });
 
                         } else {
@@ -166,12 +164,13 @@ const cargarSolicitud = (data) => {
     solicitud_en_curso.hipertenso = data.hipertenso;
     solicitud_en_curso.postrado = data.postrado;
     solicitud_en_curso.epileptico = data.epileptico;
-    cleanAmbulancias();
+    // setAmbulancias();
     if (data.Cometidos !== undefined) {
         for (var x = 0; x < data.Cometidos.length; x++) {
             const index = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(f => f.id == data.Cometidos[x].idAmbulancia));
             if (ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos !== undefined) {
                 ambulancias_disponibles.value[index].Cometidos[0].idSolicitud = data.id;
+                ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos = [];
                 for (var i = 0; i < data.Cometidos[x].tripulacionCometidos.length; i++) {
                     ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos.push(data.Cometidos[x].tripulacionCometidos[i]);
                 }
@@ -321,7 +320,7 @@ const Limpiar = () => {
         { numero: 2, createdAt: "" }
     ];
     solicitud_en_curso.obs_cierre = "";
-    cleanAmbulancias();
+    // setAmbulancias();
     document.querySelector("#btabs-animated-slideup-home-tab").click();
 }
 
@@ -329,17 +328,30 @@ const ordenarTripulacion = () => {
     tripulacion.value.sort((x, y) => x.idTipoFuncionario - y.idTipoFuncionario);
 }
 
-const setAmbulancias = (Arrays) => {
-    for (var i = 0; i < Arrays.length; i++) {
-        if (Arrays[i].Cometidos[0] == undefined) {
-            const params = {
-                'idSolicitud': null,
-                'tripulacionCometidos': []
-            }
-            Arrays[i].Cometidos.push(params);
-        }
-    }
-    return Arrays;
+const setAmbulancias = () => {
+    axios.get('https://' + url + '/api/ambulancia/disponibles', config).then((response) => {
+        let Arrays = response.data['ambulancias'];
+        ambulancias_disponibles.value = Arrays.map( (arr) => {
+            arr.Cometidos = [];
+            const arrBUSC = tripulacion.value;
+            tripulacion.value = arrBUSC.filter((tripu) => tripu.idAmbulancia !== arr.id);
+            arr.Cometidos.push(
+                {
+                    tripulacionCometidos: arrBUSC.filter((tripu) => tripu.idAmbulancia == arr.id)
+                }
+            );               
+            return arr;
+        });
+        ordenarTripulacion();
+    }).then((resp) => {
+
+        console.log(resp);
+
+    }).catch(function (error) {
+        console.log(error.response.data.msg);
+        // window.location.assign('https://www.ssarica.cl');
+    });
+
 }
 
 const anularCometido = (data, ubicacion) => {
@@ -358,28 +370,28 @@ const anularCometido = (data, ubicacion) => {
         EstadoCom: EstadoCom
     };
     axios.put('https://' + url + '/api/cometidos/delete/' + data.Cometidos[0].id, params, config).then((response) => {
-        for (let i = 0; i < params.tripulacion.length; i++) {
-            const functrip = tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario);
-            if (functrip) {
-                tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario).idEstado = 1;
-            } else {
-                tripulacion.value.push(params.tripulacion[i]);
-            }
-        }
-        ordenarTripulacion();
+        // for (let i = 0; i < params.tripulacion.length; i++) {
+        //     const functrip = tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario);
+        //     if (functrip) {
+        //         tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario).idEstado = 1;
+        //     } else {
+        //         tripulacion.value.push(params.tripulacion[i]);
+        //     }
+        // }
+        // ordenarTripulacion();
         const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id));
         const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
-        console.log('indexAMB = ' + indexAMB);
+        // console.log('indexAMB = ' + indexAMB);
         ambulancias_disponibles.value[indexAMB].despacho = null;
-        ambulancias_disponibles.value[indexAMB].Cometidos = [{ 'idSolicitud': null, 'tripulacionCometidos': [] }];
+        // ambulancias_disponibles.value[indexAMB].Cometidos = [{ 'idSolicitud': null, 'tripulacionCometidos': [] }];
 
         const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find(COM => COM.id == params.idCometido));
         solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido, 1);
-        console.log("ambulancias_disponibles = ", ambulancias_disponibles.value);
+        // console.log("ambulancias_disponibles = ", ambulancias_disponibles.value);
 
         alertSuccess();
     }).catch(function (error) {
-        // console.log(error.response.data.msg);
+        console.log(error);
         // window.location.assign('https://www.ssarica.cl');
     });
 }
@@ -399,7 +411,6 @@ const cleanAmbulancias = () => {
 onMounted(() => {
     axios.get('https://' + url + '/api/solicitud/disponibles', config).then((response) => {
         solicitudes.value = response.data['solicitudes'];
-        // document.querySelector("#btabs-animated-slideup-home-tab").click();
     }).catch(function (error) {
         console.log(error.response.data.msg);
         window.location.assign('https://www.ssarica.cl');
@@ -407,25 +418,20 @@ onMounted(() => {
     axios.get('https://' + url + '/api/Turno/disponibles', config).then((response) => {
         if (response.data['TurnoDisponible'].length > 0) {
             tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
+            setAmbulancias();
         } else {
             toast.fire("Oops...", "no existe turno creado! Antes de ingresar una solicitud, debe crear un turno", "warning");
         }
     }).catch(function (error) {
-        console.log(error.response.data.msg);
+        console.log(error);
         window.location.assign('https://www.ssarica.cl');
     });
-    axios.get('https://' + url + '/api/ambulancia/disponibles', config).then((response) => {
-        ambulancias_disponibles.value = setAmbulancias(response.data['ambulancias']);
-    }).catch(function (error) {
-        console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
-    });
+
     axios.post("https://" + url + "/api/auth/login", { key: localStorage.getItem('key') }).then((response) => {
         responsable.value = response.data['funcionario'].id;
-        console.log(response.data['funcionario']);
     }).catch(function (error) {
-        console.log(error.response.data.msg);
-        // window.location.assign('https://www.ssarica.cl');
+        console.log(error);
+        window.location.assign('https://www.ssarica.cl');
     });    
 });
 
@@ -738,7 +744,7 @@ onMounted(() => {
                                                     </h4>
                                                     <draggable :id="'AMB'+ad.id" class="list-group py-1 he-min"
                                                         :class="[ ad.despacho == 1 ? 'bg-gray-light' : 'bg-success-light' ]"
-                                                        :disabled="ad.despacho == 1"
+                                                        :disabled="true" 
                                                         :list="ad.Cometidos[0].tripulacionCometidos" group="people"
                                                         @change="$emit('log')" itemKey="name">
                                                         <template #item="{ element, index }">
@@ -752,7 +758,7 @@ onMounted(() => {
                                                                     class="badge rounded-pill bg-modern-light"> Tecnico
                                                                 </span>
                                                                 <span v-show="element.idTipoFuncionario === 3"
-                                                                    class="badge rounded-pill bg-flat"> Conductor
+                                                                    class="badge rounded-pill bg-smooth-op"> Conductor
                                                                 </span>
                                                                 {{ " "+element.Funcionario.nombre}}
                                                             </div>

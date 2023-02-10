@@ -49,31 +49,33 @@ const solicitud = reactive({
 onMounted(()=>{
   axios.get('https://'+url+'/api/solicitud/'+route.params.id,config).then((response) => {
     const data = response.data['solicitud'];
-        console.log(response.data['solicitud']);
-        solicitud.qtrs = [];
-        solicitud.id = data.id;
-        solicitud.qtrs = data.Qtrs;
-        solicitud.tipo_llamada = data.tipo_llamada;
-        solicitud.telefono = data.telefono;
-        solicitud.origen = data.origen;
-        solicitud.contacto = data.contacto;
-        solicitud.estado = data.estado;
-        solicitud.n_paciente = data.n_paciente;
-        solicitud.lugar = data.lugar;
-        solicitud.referencia = data.referencia;
-        solicitud.motivo = data.motivo;
-        solicitud.hipertenso = data.hipertenso;
-        solicitud.epileptico = data.epileptico;
-        solicitud.diabetico = data.diabetico;
-        solicitud.postrado = data.postrado;
-        solicitud.obs_cierre = "";
-        solicitud.nom_paciente = data.nom_paciente;
-        solicitud.edad_paciente = data.edad_paciente
-        solicitud.Cometidos = data.Cometidos
-    }).catch(function (error) {
-      console.log(error.response.data.msg);
-      // window.location.assign('https://www.ssarica.cl');
-    });
+    solicitud.id = data.id;
+    solicitud.tipo_llamada = data.tipo_llamada;
+    solicitud.telefono = data.telefono;
+    solicitud.origen = data.origen;
+    solicitud.contacto = data.contacto;
+    solicitud.estado = data.estado;
+    solicitud.n_paciente = data.n_paciente;
+    solicitud.lugar = data.lugar;
+    solicitud.referencia = data.referencia;
+    solicitud.motivo = data.motivo;
+    solicitud.hipertenso = data.hipertenso;
+    solicitud.epileptico = data.epileptico;
+    solicitud.diabetico = data.diabetico;
+    solicitud.postrado = data.postrado;
+    solicitud.obs_cierre = "";
+    solicitud.nom_paciente = data.nom_paciente;
+    solicitud.edad_paciente = data.edad_paciente;
+    let pp = Math.max.apply(Math, data.Qtrs.map(function(o) { return o.id; }));
+    solicitud.qtrs = data.Qtrs.filter((qtr) => qtr.numero < 3  || qtr.id == pp);
+    let cp = Math.max.apply(Math, data.Cometidos.map(function(o) { return o.id; }));
+    solicitud.Cometidos = data.Cometidos.filter((qtr) => qtr.id == cp);
+    console.log(data.Cometidos);
+
+  }).catch(function (error) {
+    console.log(error);
+    // window.location.assign('https://www.ssarica.cl');
+  });
 });
 
 </script>

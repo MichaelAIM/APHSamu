@@ -122,11 +122,11 @@ const routes = [
   },
   {
     path: "/",
-    redirect: "/backend/tripulacion",
-    component: LayoutSimple,
+    redirect: "/backend/dashboard",
+    component: LayoutBackend,
     children: [
       {
-        path: "tripulacion/:id",
+        path: "tripulacion",
         name: "tripulacion-dashboard",
         component: Tripulacion,
       },

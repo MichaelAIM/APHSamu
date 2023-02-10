@@ -48,15 +48,13 @@ const seleccionados = reactive({
     conductor:[]
 });
 // ingresar o eliminar funcionario seleccionado para el turno
-function toggle(arr,item,ev){
-    console.log(item);
+function toggle(arr,item){
+    // console.log(item);
     const index = seleccionados[arr].indexOf(seleccionados[arr].find( Sel => Sel.Funcionario.id == item.Funcionario.id));
     const index2 = funcionarios[arr].indexOf(funcionarios[arr].find( Func => Func.Funcionario.id == item.Funcionario.id));
     if (index != -1) {
         axios.get('https://' + url + '/api/cometidos/disponibles', config).then((response) => {
-            console.log(response.data['cometidos']);
-            if(response.data['cometidos'] !== ""){
-                // alert();
+            if(response.data['cometidos'].length > 0){
                 response.data['cometidos'].map((cometido) => {
                     if (cometido.tripulacionCometidos.find( func => func.idFuncionario ==  item.Funcionario.id)) {
                         toast.fire("Oops...", "No es posible eliminar al funcionario, tiene un cometido en curso", "warning");                        
@@ -68,12 +66,15 @@ function toggle(arr,item,ev){
             }else{
                 funcionarios[arr].push(item);
                 seleccionados[arr].splice(index,1);
+                console.log(seleccionados[arr]);
+                GuardarTurno();
             }
         }).catch(function (error) {
             console.log(error);
         });
 
     }else{
+        console.log("aqui");
         item.idTipoFuncionario = item.Funcionario.idRol;
         item.idFuncionario = item.Funcionario.id;
         seleccionados[arr].push(item);
@@ -99,7 +100,8 @@ const filterConductor = computed(() => {
 // lismpiar el array de funcionarios seleccionados
 function Limpiar(){
     axios.get('https://' + url + '/api/cometidos/disponibles', config).then((response) => {
-        if(response.data['cometidos'] !== ""){
+        console.log(response.data['cometidos']);
+        if(response.data['cometidos'].length > 0){
             toast.fire("Oops...", "No es posible eliminar la tripulación, Hay un cometido en curso", "warning");
         }else{
             if (seleccionados["enfermero"] != "") {
@@ -127,7 +129,7 @@ function Limpiar(){
 }
 
 function GuardarTurno(){
-    console.log(responsable.value);
+    console.log("Responsable",responsable.value);
     btnLoading.value = true;
     allTurno.value = [];
     for (let i = 0; i < seleccionados.enfermero.length; i++) {
@@ -175,6 +177,8 @@ onBeforeMount(() => {
                     }else{}
                 }
             }
+        console.log(seleccionados);
+
         }else{
             toast.fire("Oops...", "no existe turno creado!", "warning");             
         }
@@ -205,7 +209,6 @@ onBeforeMount(() => {
                     }else{}
                 }
             }
-        
     }).catch(function (error) {
         console.log(error.response.data.msg);
         //window.location.assign('https://www.ssarica.cl');
