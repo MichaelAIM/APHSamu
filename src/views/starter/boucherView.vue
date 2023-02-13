@@ -71,7 +71,6 @@ onMounted(()=>{
     let cp = Math.max.apply(Math, data.Cometidos.map(function(o) { return o.id; }));
     solicitud.Cometidos = data.Cometidos.filter((qtr) => qtr.id == cp);
     console.log(data.Cometidos);
-
   }).catch(function (error) {
     console.log(error);
     // window.location.assign('https://www.ssarica.cl');
