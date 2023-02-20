@@ -458,10 +458,14 @@ onMounted(() => {
                             </li>
                         </ul>
                         <div class="block-options space-x-1">
+                            <button type="button" class="btn btn-sm btn-alt-secondary mb-2" @click="Limpiar">
+                                <i class="fa fa-plus opacity-50 me-1"></i>
+                                Nueva Solicitud
+                            </button>
                             <button type="button" class="btn btn-sm btn-alt-primary mb-2" @click="guardarSolicitud">
                                 Guardar </button>
                             <button type="button" class="btn btn-sm btn-alt-info mb-2" @click="cerrarSolicitud"> Cerrar
-                            </button>
+                            </button>                            
                         </div>
                     </div>
                     <div class="block-content tab-content overflow-hidden">
@@ -722,6 +726,8 @@ onMounted(() => {
                                                 <template
                                                     v-if="ad.estado == 1 && ad.despacho != 1 || solicitud_en_curso.id === ad.Cometidos[0].idSolicitud">
                                                     <h4>
+                                                        <a type="button" class="btn btn-sm rounded-pill btn-success me-3" style="padding: 0.25rem;" v-show="ad.tipo == 1">  </a>
+                                                        <a type="button" class="btn btn-sm rounded-pill btn-primary me-3" style="padding: 0.25rem;" v-show="ad.tipo == 2">  </a>
                                                         Movil {{ad.movil}}
                                                         <a type="button" class="btn btn-sm btn-alt-primary ms-3"
                                                             v-show="ad.despacho != 1" @click="Despacho(ad,1)">
