@@ -100,7 +100,7 @@ const Despacho = (data, accion) => {
                 if (result.value) {
                     //Crear Cometido
                     if (accion === 1) {
-                        if (solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo && solicitud_en_curso.qtrs[1].createdAt !== "") {    
+                        if (solicitud_en_curso.telefono &&solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo && solicitud_en_curso.qtrs[1].createdAt !== "") {    
                             const params = {
                                 'idSolicitud': solicitud_en_curso.id,
                                 'nom_paciente': solicitud_en_curso.nom_paciente,
@@ -168,13 +168,9 @@ const cargarSolicitud = (data) => {
     if (data.Cometidos !== undefined) {
         for (var x = 0; x < data.Cometidos.length; x++) {
             const index = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(f => f.id == data.Cometidos[x].idAmbulancia));
-            if (ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos !== undefined) {
-                ambulancias_disponibles.value[index].Cometidos[0].idSolicitud = data.id;
-                ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos = [];
-                for (var i = 0; i < data.Cometidos[x].tripulacionCometidos.length; i++) {
-                    ambulancias_disponibles.value[index].Cometidos[0].tripulacionCometidos.push(data.Cometidos[x].tripulacionCometidos[i]);
-                }
-            }
+            ambulancias_disponibles.value[index].despacho = 1;
+            ambulancias_disponibles.value[index].Cometidos = []
+            ambulancias_disponibles.value[index].Cometidos.push(data.Cometidos[x]);
         }
     }
 }
@@ -370,25 +366,11 @@ const anularCometido = (data, ubicacion) => {
         EstadoCom: EstadoCom
     };
     axios.put('https://' + url + '/api/cometidos/delete/' + data.Cometidos[0].id, params, config).then((response) => {
-        // for (let i = 0; i < params.tripulacion.length; i++) {
-        //     const functrip = tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario);
-        //     if (functrip) {
-        //         tripulacion.value.find(TR => TR.idFuncionario == params.tripulacion[i].idFuncionario).idEstado = 1;
-        //     } else {
-        //         tripulacion.value.push(params.tripulacion[i]);
-        //     }
-        // }
-        // ordenarTripulacion();
         const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id));
         const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
-        // console.log('indexAMB = ' + indexAMB);
         ambulancias_disponibles.value[indexAMB].despacho = null;
-        // ambulancias_disponibles.value[indexAMB].Cometidos = [{ 'idSolicitud': null, 'tripulacionCometidos': [] }];
-
         const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find(COM => COM.id == params.idCometido));
         solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido, 1);
-        // console.log("ambulancias_disponibles = ", ambulancias_disponibles.value);
-
         alertSuccess();
     }).catch(function (error) {
         console.log(error);
@@ -408,7 +390,13 @@ const cleanAmbulancias = () => {
     }
 }
 
+
+
 onMounted(() => {
+
+    const element = document.querySelector('#btabs-animated-slideup-settings-tab');
+    element.classList.remove('active');
+
     axios.get('https://' + url + '/api/solicitud/disponibles', config).then((response) => {
         solicitudes.value = response.data['solicitudes'];
     }).catch(function (error) {
