@@ -14,10 +14,10 @@
             />
           <h1 class="fw=bold mt-3 mb-2">
             Samu APH  |
-            <span class="fw-light"> Atención Pre Hospitalaría</span>
+            <span class="fw-light"> Atención Pre Hospitalaria</span>
           </h1>
           <p class="fs-lg fw-medium text-muted mb-4">
-            Bienvenido al sistema de gestion para la atención prehospitalaria.
+            Bienvenido al sistema de gestión para la atención prehospitalaria.
           </p>
           <RouterLink
             :to="{ name: 'turno-dashboard' }"

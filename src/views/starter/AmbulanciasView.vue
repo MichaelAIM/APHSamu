@@ -273,7 +273,7 @@ if (window.document.location.host === "localhost:3000" || window.document.locati
                                 <thead>
                                     <tr style="">
                                         <th class="d-none d-sm-table-cell text-center" style="width: 50px;">#</th>
-                                        <th class="text-center" style="width: 25%;">Movil</th>
+                                        <th class="text-center" style="width: 25%;">Móvil</th>
                                         <th class="text-center" style="width: 30%;"> Estado </th>
                                         <th class="text-center" style="width: 25%;"> Patente </th>
                                         <th class="text-center"></th>
@@ -285,7 +285,7 @@ if (window.document.location.host === "localhost:3000" || window.document.locati
                                           <span v-show="amb.tipo == 2" class="badge bg-primary">A</span>
                                           <span v-show="amb.tipo == 1" class="badge bg-success">B</span>
                                         </td>
-                                        <td class="fw-semibold fs-sm">Movil {{amb.movil}}</td>
+                                        <td class="fw-semibold fs-sm">Móvil {{amb.movil}}</td>
                                         <td class="">
                                           <span class="fs-xs fw-semibold d-inline-block py-1 px-3 rounded-pill bg-success-light text-success" v-if="amb.estado == 1">Disponible</span>
                                           <span class="fs-xs fw-semibold d-inline-block py-1 px-3 rounded-pill bg-danger-light text-danger" v-else>No Disponible</span>

@@ -267,7 +267,7 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <h4>Tecnicos</h4>
+                                <h4>Técnicos</h4>
                                 <div class="row">
                                     <div class="col-auto text-white block pe-1 mb-0" v-for="TS in seleccionados.tecnico" :key="TS.Funcionario.id">
                                         <div class="block-header px-0">
@@ -331,7 +331,7 @@ onMounted(() => {
                 <div class="block-bordered block-rounded block pb-4">
                     <div class="block-header block-header-default">
                         <h3 class="block-title">
-                            Tecnicos <small>
+                            Técnicos <small>
                                 (Seleccionar)</small>
                         </h3>
                     </div>

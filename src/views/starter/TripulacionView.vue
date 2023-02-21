@@ -177,14 +177,16 @@ onMounted(() => {
                                     <div class="col-6">
                                         <div class="row">
                                             <h3>
-                                                Moviles
+                                                Móviles
                                                 <i class="nav-main-link-icon fa fa-truck-medical float-end"></i>
                                             </h3>
                                             <hr>
                                             <div class="col-12 my-2" v-for="ad in ambulancias_disponibles" :key="ad.id">
                                                 <template v-if="ad.estado == 1">
                                                     <h4>
-                                                        Movil {{ad.movil}}                                                        
+                                                        <span class="badge rounded-pill bg-success me-2" style="font-size: 0.5em; vertical-align: middle;" v-show="ad.tipo == 1"> Básica </span>                                           
+                                                        <span class="badge rounded-pill bg-primary me-2" style="font-size: 0.5em; vertical-align: middle;" v-show="ad.tipo == 2"> Avanzada </span>                                           
+                                                        Móvil {{ad.movil}}
                                                     </h4>
                                                     <draggable :id="'AMB'+ad.id" class="list-group py-1 he-min bg-success-light"
                                                         :list="ad.Cometidos[0].tripulacionCometidos" group="people" @change="$emit('log')" itemKey="name">
@@ -192,7 +194,7 @@ onMounted(() => {
                                                             <div class="list-group-item border-modern border border-4 rounded text-modern cursor-p px-3 py-1 my-1 fs-14">
                                                                 {{index+1}} -
                                                                 <span v-show="element.idTipoFuncionario === 1" class="badge rounded-pill bg-primary-op"> Enfermero </span>
-                                                                <span v-show="element.idTipoFuncionario === 2" class="badge rounded-pill bg-modern-light"> Tecnico </span>
+                                                                <span v-show="element.idTipoFuncionario === 2" class="badge rounded-pill bg-modern-light"> Técnico </span>
                                                                 <span v-show="element.idTipoFuncionario === 3" class="badge rounded-pill bg-smooth-op"> Conductor </span> 
                                                                 {{ " " + element.Funcionario.nombre }}
                                                             </div>
@@ -215,7 +217,7 @@ onMounted(() => {
                                             <template #item="{ element }">
                                                 <div class="list-group-item border-modern border border-4 rounded text-modern cursor-p px-3 py-1 my-1 fs-14">
                                                     <span v-show="element.idTipoFuncionario === 1" class="badge rounded-pill bg-primary-op"> Enfermero </span>
-                                                    <span v-show="element.idTipoFuncionario === 2" class="badge rounded-pill bg-modern-light"> Tecnico </span>
+                                                    <span v-show="element.idTipoFuncionario === 2" class="badge rounded-pill bg-modern-light"> Técnico </span>
                                                     <span v-show="element.idTipoFuncionario === 3" class="badge rounded-pill bg-smooth-op"> Conductor </span>
                                                     {{ " " + element.Funcionario.nombre }}
                                                 </div>

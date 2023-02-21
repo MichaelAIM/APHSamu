@@ -512,7 +512,7 @@ onMounted(() => {
                                                     <input type="time" class="form-control"
                                                         :value="moment(solicitud_en_curso.qtrs[1].createdAt).format('HH:mm:ss')"
                                                         disabled id="qtr2" name="qtr2">
-                                                    <label for="example-text-input-floating">Termino de Llamada (QTR2)
+                                                    <label for="example-text-input-floating">Término de Llamada (QTR2)
                                                     </label>
                                                 </div>
                                             </div>
@@ -525,7 +525,7 @@ onMounted(() => {
                                                                 id="example-radio-block1"
                                                                 v-model="solicitud_en_curso.tipo_llamada" value="1">
                                                             <label class="form-check-label" for="example-radio-block1">
-                                                                <span class="d-block fw-normal text-center">
+                                                                <span class="d-block fw-normal text-cen">
                                                                     <span
                                                                         class="d-block fs-sm text-muted">Telefónico</span>
                                                                 </span>
@@ -563,7 +563,7 @@ onMounted(() => {
                                                     v-show="solicitud_en_curso.tipo_llamada == 1">
                                                     <input type="number" min="1" class="form-control" id="example-text-input-floating"
                                                         v-model.number="solicitud_en_curso.telefono"  name="example-text-input-floating" placeholder="Solo Numeros">
-                                                    <label for="example-text-input-floating">Teléfono (solo números)</label>
+                                                    <label for="example-text-input-floating">Teléfono (Sólo Números)</label>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-md-4 mb-4">
@@ -702,7 +702,7 @@ onMounted(() => {
                                                                 src="/assets/media/avatars/avatar1.jpg"
                                                                 alt="Avatar"><span class="ms-2">
                                                                     <!-- <span class="fw-bold">Postrado</span> -->
-                                                                    <span class="d-block fs-sm text-muted">Epileptico</span>
+                                                                    <span class="d-block fs-sm text-muted">Epiléptico</span>
                                                                 </span>
                                                             </span>
                                                         </label>
@@ -729,7 +729,7 @@ onMounted(() => {
                                     <div class="col-6">
                                         <div class="row">
                                             <h3>
-                                                Moviles
+                                                Móviles
                                                 <i class="nav-main-link-icon fa fa-truck-medical float-end"></i>
                                             </h3>
                                             <hr>
@@ -739,7 +739,7 @@ onMounted(() => {
                                                     <h4>
                                                         <a type="button" class="btn btn-sm rounded-pill btn-success me-3" style="padding: 0.25rem;" v-show="ad.tipo == 1">  </a>
                                                         <a type="button" class="btn btn-sm rounded-pill btn-primary me-3" style="padding: 0.25rem;" v-show="ad.tipo == 2">  </a>
-                                                        Movil {{ad.movil}}
+                                                        Móvil {{ad.movil}}
                                                         <a type="button" class="btn btn-sm btn-alt-primary ms-3"
                                                             v-show="ad.despacho != 1" @click="Despacho(ad,1)">
                                                             Despachar </a>
@@ -760,7 +760,7 @@ onMounted(() => {
                                                                     class="badge rounded-pill bg-primary-op"> Enfermero
                                                                 </span>
                                                                 <span v-show="element.idTipoFuncionario === 2"
-                                                                    class="badge rounded-pill bg-modern-light"> Tecnico
+                                                                    class="badge rounded-pill bg-modern-light"> Técnico
                                                                 </span>
                                                                 <span v-show="element.idTipoFuncionario === 3"
                                                                     class="badge rounded-pill bg-smooth-op"> Conductor
@@ -790,7 +790,7 @@ onMounted(() => {
                                                     <span v-show="element.idTipoFuncionario === 1"
                                                         class="badge rounded-pill bg-primary-op"> Enfermero </span>
                                                     <span v-show="element.idTipoFuncionario === 2"
-                                                        class="badge rounded-pill bg-modern-light"> Tecnico </span>
+                                                        class="badge rounded-pill bg-modern-light"> Técnico </span>
                                                     <span v-show="element.idTipoFuncionario === 3"
                                                         class="badge rounded-pill bg-smooth-op"> Conductor </span>
                                                     {{ " "+element.Funcionario.nombre}}

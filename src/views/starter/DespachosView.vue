@@ -26,101 +26,6 @@ const config = {
         'x-token': localStorage.getItem('uid')
     }
 };
-
-// const ambulancias_disponibles = ref([
-//     {
-//         id: 1,
-//         name: 'Movil 1',
-//         numero:1,
-//         solicitud: 4,
-//         tipo:2,
-//         dap: 13,
-//         estado: 1,
-//         despacho: true,
-//         tripulacion: [
-//             { name: "Juan Carlos Ramirez", id: 1, tipo:1, estado:1, movil:1},
-//             { name: "Edgard doe", id: 4, tipo:2, estado:1, movil:1},
-//             { name: "Dwayne Johnson", id: 11, tipo:3 , estado:1, movil:1},
-//         ],
-//         motivo:"",
-//         f_salida:"2022-05-14 12:54:08",
-//         qtrs:[
-//           { id:1, numero:1, created_at: "2022-04-21 11:32:55" },
-//           { id:2, numero:2, created_at: "2022-04-21 11:35:15" },
-//           { id:3, numero:3, created_at: "2022-04-21 12:02:12" },
-//         ],
-//     },
-//     {
-//         id: 2,
-//         name: 'Movil 2',
-//         numero:2,
-//         solicitud: 2,
-//         tipo:1,
-//         dap: null,
-//         estado: 1,
-//         despacho: false,
-//         tripulacion: [],
-//         motivo:"",
-//         f_salida:"",
-//         qtrs:[],
-//     },
-//     {
-//         id: 4,
-//         name: 'Movil 4',
-//         numero:4,
-//         solicitud: null,
-//         tipo:1,
-//         dap: null,
-//         estado: 1,
-//         despacho: false,
-//         tripulacion: [],
-//         motivo:"",
-//         f_salida:"",
-//         qtrs:[],
-//     },
-//     {
-//         id: 6,
-//         name: 'Movil 15',
-//         numero:15,
-//         solicitud: null,
-//         tipo:1,
-//         dap: null,
-//         estado: 1,
-//         despacho: false,
-//         tripulacion: [],
-//         motivo:"",
-//         f_salida:"",
-//         qtrs:[],
-//     },
-//     {
-//         id: 5,
-//         name: 'Movil 14',
-//         solicitud: null,
-//         numero:14,
-//         tipo:1,
-//         dap: null,
-//         estado: 2,
-//         despacho: false,
-//         tripulacion: [],
-//         motivo:"La ambulancia no esta disponible por falla de motor.",
-//         f_salida:"",
-//         qtrs:[],
-//     },
-//     {
-//         id: 3,
-//         name: 'Movil 3',
-//         numero:3,
-//         solicitud: null,
-//         tipo:1,
-//         dap: null,
-//         estado: 2,
-//         despacho: false,
-//         tripulacion: [],
-//         motivo:" La ambulancia se encuentra en el taller por cambio de pastillas de freno",
-//         f_salida:"",
-//         qtrs:[],
-//     },
-// ]);
 const ambulancias_disponibles = ref();
 const kpis = ref({
     activos:[],
@@ -274,7 +179,7 @@ onMounted(() => {
                                 <div class="d-flex align-items-center">
                                     <h4 class="flex-grow-1 my-auto">
                                         <i class="far fa-circle-dot me-2" :class="[amb.estado == 1 ? 'text-success' : ' text-warning']"></i>
-                                        Movíl N° {{amb.movil}}
+                                        Móvíl N° {{amb.movil}}
                                         <span v-show="amb.tipo == 1" class="badge bg-info align-middle badgeTipo">Básica</span>
                                         <span v-show="amb.tipo == 2" class="badge bg-flat-op align-middle badgeTipo">Avanzada</span>
                                         <span class="badge bg-warning-M align-middle ms-2 px-3" v-show="amb.estado == 1 && amb.despacho">En Cometido</span>
