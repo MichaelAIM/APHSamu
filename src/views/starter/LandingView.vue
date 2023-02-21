@@ -100,34 +100,50 @@ const Despacho = (data, accion) => {
                 if (result.value) {
                     //Crear Cometido
                     if (accion === 1) {
-                        if (solicitud_en_curso.telefono &&solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo && solicitud_en_curso.qtrs[1].createdAt !== "") {    
-                            const params = {
-                                'idSolicitud': solicitud_en_curso.id,
-                                'nom_paciente': solicitud_en_curso.nom_paciente,
-                                'tripulacion': data.Cometidos[0].tripulacionCometidos,
-                                'idAmbulancia': data.id
-                            }
-                            axios.post('https://' + url + '/api/cometidos', params, config).then((response) => {
-                                response.data['cometido']['tripulacionCometidos'] = params.tripulacion;
-                                const rspTripCometido = response.data['cometido']['tripulacionCometidos'];
-                                for (let i = 0; i < rspTripCometido.length; i++) {
-                                    rspTripCometido[i]['idTripTurno'] = rspTripCometido[i].id;
-                                }
-                                const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
-                                ambulancias_disponibles.value[indexAMB].despacho = true;
-                                ambulancias_disponibles.value[indexAMB].Cometidos[0].idSolicitud = solicitud_en_curso.id;
-                                ambulancias_disponibles.value[indexAMB].Cometidos[0]['id'] = response.data['cometido'].id;
-                                solicitudes.value[solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id))].Cometidos.push(response.data['cometido']);
-                                alertSuccess();
-                                window.open(boucher + '/#/boucher/' + solicitud_en_curso.id);
-                            }).catch(function (error) {
-                                console.log(error);
-                                toast.fire("Oops...", error, "error");
-                            });
-
+                        let validaFono = false;
+                        if (solicitud_en_curso.tipo_llamada == 1) {
+                            if(solicitud_en_curso.telefono ){
+                                validaFono = true;
+                            }                            
                         } else {
-                            toast.fire("Oops...", "Debe rellenar todos los campos marcados con * en la solicitud", "error");
+                            if(solicitud_en_curso.tipo_llamada){
+                                validaFono = true;
+                            }
                         }
+
+                        if (validaFono) {
+                            if (solicitud_en_curso.tipo_llamada && solicitud_en_curso.lugar && solicitud_en_curso.motivo && solicitud_en_curso.qtrs[1].createdAt !== "") {    
+                                const params = {
+                                    'idSolicitud': solicitud_en_curso.id,
+                                    'nom_paciente': solicitud_en_curso.nom_paciente,
+                                    'tripulacion': data.Cometidos[0].tripulacionCometidos,
+                                    'idAmbulancia': data.id
+                                }
+                                axios.post('https://' + url + '/api/cometidos', params, config).then((response) => {
+                                    response.data['cometido']['tripulacionCometidos'] = params.tripulacion;
+                                    const rspTripCometido = response.data['cometido']['tripulacionCometidos'];
+                                    for (let i = 0; i < rspTripCometido.length; i++) {
+                                        rspTripCometido[i]['idTripTurno'] = rspTripCometido[i].id;
+                                    }
+                                    const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
+                                    ambulancias_disponibles.value[indexAMB].despacho = true;
+                                    ambulancias_disponibles.value[indexAMB].Cometidos[0].idSolicitud = solicitud_en_curso.id;
+                                    ambulancias_disponibles.value[indexAMB].Cometidos[0]['id'] = response.data['cometido'].id;
+                                    solicitudes.value[solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id))].Cometidos.push(response.data['cometido']);
+                                    alertSuccess();
+                                    window.open(boucher + '/#/boucher/' + solicitud_en_curso.id);
+                                }).catch(function (error) {
+                                    console.log(error);
+                                    toast.fire("Oops...", error, "error");
+                                });
+
+                            } else {
+                                toast.fire("Oops...", "Debe rellenar todos los campos marcados con * en la solicitud", "error");
+                            }
+                        } else {
+                            toast.fire("Oops...", "Verifique el tipo de llamada y el numero de teléfono", "error");                            
+                        }
+
                     }
                     //Cancelar Cometido
                     else {
@@ -215,7 +231,8 @@ const guardarSolicitud = () => {
                 alertSuccess();
             }).catch(function (error) {
                 console.log(error.response.data.msg);
-                window.location.assign('https://www.ssarica.cl');
+                toast.fire("Oops...", "Error no se guardó su solicitud", "error");
+                // window.location.assign('https://www.ssarica.cl');
             });
         } else {
             // Inserta nueva  solicitud
@@ -244,9 +261,8 @@ const guardarSolicitud = () => {
                         solicitudes.value.push(arrSolicitud);
                     });
                 }
-                console.log(arrSolicitud);
             }).catch(function (error) {
-                console.log(error.response.data.msg);
+                console.log(error);
                 toast.fire("Oops...", "Error no se guardó su solicitud", "error");
                 // window.location.assign('https://www.ssarica.cl');
             });
@@ -285,8 +301,9 @@ const anularSolicitud = () => {
             );
             solicitudes.value.splice(indice, 1);
         }).catch(function (error) {
-            console.log(error.response.data.msg);
-            window.location.assign('https://www.ssarica.cl');
+            console.log(error);
+            toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
+            // window.location.assign('https://www.ssarica.cl');
         });
     } else {
         toast.fire("Oops...", "Debe ingresar un motivo de cierre", "warning");
@@ -339,13 +356,10 @@ const setAmbulancias = () => {
             return arr;
         });
         ordenarTripulacion();
-    }).then((resp) => {
-
-        console.log(resp);
-
     }).catch(function (error) {
         console.log(error.response.data.msg);
-        // window.location.assign('https://www.ssarica.cl');
+        toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
+        
     });
 
 }
@@ -374,7 +388,7 @@ const anularCometido = (data, ubicacion) => {
         alertSuccess();
     }).catch(function (error) {
         console.log(error);
-        // window.location.assign('https://www.ssarica.cl');
+        toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
     });
 }
 
@@ -401,7 +415,7 @@ onMounted(() => {
         solicitudes.value = response.data['solicitudes'];
     }).catch(function (error) {
         console.log(error.response.data.msg);
-        window.location.assign('https://www.ssarica.cl');
+        toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
     });
     axios.get('https://' + url + '/api/Turno/disponibles', config).then((response) => {
         if (response.data['TurnoDisponible'].length > 0) {
@@ -412,7 +426,7 @@ onMounted(() => {
         }
     }).catch(function (error) {
         console.log(error);
-        window.location.assign('https://www.ssarica.cl');
+        toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
     });
 
     axios.post("https://" + url + "/api/auth/login", { key: localStorage.getItem('key') }).then((response) => {
@@ -547,12 +561,9 @@ onMounted(() => {
                                             <div class="col-12 col-md-4 mb-4">
                                                 <div class="form-floating mt-4"
                                                     v-show="solicitud_en_curso.tipo_llamada == 1">
-                                                    <input type="number" min="1" pattern="[^-]" class="form-control"
-                                                        id="example-text-input-floating"
-                                                        v-model.number="solicitud_en_curso.telefono"
-                                                        name="example-text-input-floating" placeholder="Juan Perez">
-                                                    <label for="example-text-input-floating">Teléfono (solo
-                                                        numeros)</label>
+                                                    <input type="number" min="1" class="form-control" id="example-text-input-floating"
+                                                        v-model.number="solicitud_en_curso.telefono"  name="example-text-input-floating" placeholder="Solo Numeros">
+                                                    <label for="example-text-input-floating">Teléfono (solo números)</label>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-md-4 mb-4">

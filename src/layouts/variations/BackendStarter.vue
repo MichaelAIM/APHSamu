@@ -21,7 +21,7 @@ store.setLayout({
 store.headerStyle({ mode: "dark" });
 store.mainContent({ mode: "narrow" });
 let encode = "";
-console.log(window.document.location.host);
+// console.log(window.document.location.host);
 
 if (window.document.location.host === "localhost:3000" || window.document.location.host === "10.8.83.74:3000") {
 
