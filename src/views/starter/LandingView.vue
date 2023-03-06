@@ -117,9 +117,11 @@ const Despacho = (data, accion) => {
                                     'idSolicitud': solicitud_en_curso.id,
                                     'nom_paciente': solicitud_en_curso.nom_paciente,
                                     'tripulacion': data.Cometidos[0].tripulacionCometidos,
+                                    'resp': responsable.value,
                                     'idAmbulancia': data.id
                                 }
                                 axios.post('https://' + url + '/api/cometidos', params, config).then((response) => {
+                                    console.log(response.data);
                                     response.data['cometido']['tripulacionCometidos'] = params.tripulacion;
                                     const rspTripCometido = response.data['cometido']['tripulacionCometidos'];
                                     for (let i = 0; i < rspTripCometido.length; i++) {
@@ -380,11 +382,13 @@ const anularCometido = (data, ubicacion) => {
         EstadoCom: EstadoCom
     };
     axios.put('https://' + url + '/api/cometidos/delete/' + data.Cometidos[0].id, params, config).then((response) => {
-        const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id));
         const indexAMB = ambulancias_disponibles.value.indexOf(ambulancias_disponibles.value.find(AD => AD.id == data.id));
         ambulancias_disponibles.value[indexAMB].despacho = null;
-        const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find(COM => COM.id == params.idCometido));
-        solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido, 1);
+        if(solicitud_en_curso.id){
+            const indexSolicitud = solicitudes.value.indexOf(solicitudes.value.find(SOL => SOL.id == solicitud_en_curso.id));
+            const indexCometido = solicitudes.value[indexSolicitud].Cometidos.indexOf(solicitudes.value[indexSolicitud].Cometidos.find(COM => COM.id == params.idCometido));
+            solicitudes.value[indexSolicitud].Cometidos.splice(indexCometido, 1);
+        }
         alertSuccess();
     }).catch(function (error) {
         console.log(error);
@@ -410,6 +414,8 @@ onMounted(() => {
 
     const element = document.querySelector('#btabs-animated-slideup-settings-tab');
     element.classList.remove('active');
+    const nt = document.querySelector('#btabs-animated-slideright-profile-tab');
+    nt.classList.remove('active');
 
     axios.get('https://' + url + '/api/solicitud/disponibles', config).then((response) => {
         solicitudes.value = response.data['solicitudes'];
@@ -417,6 +423,7 @@ onMounted(() => {
         console.log(error.response.data.msg);
         toast.fire("Oops...", "Ocurrio un error por favor actualice la pagina", "error");
     });
+
     axios.get('https://' + url + '/api/Turno/disponibles', config).then((response) => {
         if (response.data['TurnoDisponible'].length > 0) {
             tripulacion.value = response.data['TurnoDisponible'][0].tripulacionTurnos;
